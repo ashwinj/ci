@@ -1,0 +1,12 @@
+int strlen(char* s) {
+	int i;
+	for(i = 0; s[i] != '\0'; i = i + 1);
+	return i;
+}
+
+int main() {	
+	char a[7] = {'a', 's', 'h', 'w', 'i', 'n', '\0'};
+	int x = strlen(a);
+	printf("String length is %d.\n", x);
+	return 0;
+}

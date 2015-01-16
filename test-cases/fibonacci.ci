@@ -1,0 +1,28 @@
+void fib(int n) {
+	int i;
+	long x, y, z;
+	for(i = 0; i <= n; i = i+1) {
+		if(i == 0) {
+			x = 1;
+			z = 1;
+		} else if(i == 1) {
+			y = 1;
+			z = 1;
+		} else {
+			z = x+y;
+			x=y;
+			y=z;
+		}
+		printf("%ld\t", z);
+	}
+}
+
+int main() {
+	int x;
+	printf("Enter the number:\t");
+	scanf("%d", &x);
+	printf("\nFibonacci value:\t");
+	fib(x);
+	printf("\n");
+	return 0;
+}

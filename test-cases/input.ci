@@ -1,0 +1,8 @@
+int main() {
+	int x, y;
+	printf("Enter x and y:\t");
+	scanf("%d%d",&x,&y);
+	printf("\nDon't be an ass. You know that the sum is %d.\n",x+y);
+	printf("\n");
+	return 0;
+}

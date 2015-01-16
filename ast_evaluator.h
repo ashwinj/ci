@@ -1,0 +1,52 @@
+#ifndef _AST_EVALUATOR_H_
+#define _AST_EVALUATOR_H_
+
+#include "interpreter.h"
+#include "symbol_table.h"
+#include <stdlib.h>
+#include <string.h>
+
+returnable* eval_constant(ast const_node);
+data_type eval_type(ast type_node);
+returnable* eval_var_rval(ast var_node);
+returnable* eval_arr_rval(ast arr_node);
+returnable* eval_var_lval(ast var_node);
+returnable* eval_arr_lval(ast arr_node);
+returnable* eval_func_call(ast node);
+returnable* exec_lib_func(char* func, returnable* param_list);
+returnable* eval_param_list(ast param_list);
+returnable* eval_exp(ast exp_node, int mode);
+returnable* eval_exp_list(ast node);
+returnable* eval_assign_exp(ast node);
+returnable* eval_arithmetic_exp(ast node);
+returnable* eval_shift_exp(ast node);
+returnable* eval_rel_exp(ast node);
+returnable* eval_bitwise_exp(ast node);
+returnable* eval_logical_exp(ast node);
+returnable* eval_conditional_exp(ast node);
+returnable* eval_unary_minus_exp(ast node);
+returnable* eval_deref_exp(ast node, int mode);
+returnable* eval_ref_exp(ast node);
+int eval_stmt(ast stmt_node);
+int eval_exp_stmt(ast stmt_node);
+int eval_for_stmt(ast node);
+int eval_while_stmt(ast node);
+int eval_if_stmt(ast node);
+int eval_block_stmt(ast node);
+void eval_func_def(ast function);
+void eval_main_def(ast _main_);
+int eval_return_stmt(ast stmt);
+int eval_break_stmt(ast stmt);
+int eval_continue_stmt(ast stmt);
+int eval_stmt_list(ast node);
+int exec_func(ast node, returnable* params);
+int eval_global_var_decl_list(ast global_decl);
+int eval_context_var_decl_list(ast context_decl);
+int eval_var_decl_list(st* table, ast vtdl);
+int eval_var_decl(st* table, ast variable);
+int decl_var(st* table, data_type type, ast var);
+int decl_arr(st* table, data_type type, ast var);
+int init_var(st* table, char* var, ast init_exp);
+int init_arr(st_entry* entry, ast init_list);
+
+#endif

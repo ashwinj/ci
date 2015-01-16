@@ -1,0 +1,27 @@
+int strlen(char* s) {
+	int i;
+	for(i = 0; s[i] != '\0'; i = i + 1);
+	return i;
+}
+
+void swap(char* x, char* y) {
+	char temp;
+	temp = *x;
+	*x = *y;
+	*y = temp;
+}
+
+void strrev(char* str) {
+	int i;
+	int x = strlen(str);
+	for(i = 0;i < x/2; i = i+1)
+		swap(&str[i], &str[x-i-1]);
+}
+
+int main() {	
+	char a[7] = {'a', 's', 'h', 'w', 'i', 'n', '\0'};
+	printf("Input string is:\t\"%s\".\n", a);
+	strrev(a);
+	printf("Reversed string is:\t\"%s\".\n", a);
+	return 0;
+}
