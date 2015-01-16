@@ -49,12 +49,15 @@ int _start_() {
 	/* print some shit and wait for user input */
 	/* this one not working correctly right now */
 	publish_masthead();
-	init(TRUE);
 	fprintf(stderr, "ci>> ");
 	yyin=stdin;
 	while(1) {
+		init(TRUE);
 		yyparse();
 		if(_main_ref_ != NULL) eval_func_call(_main_ref_);
+		purge_st(global_symbol_table);
+		purge_asts();
+		_main_ref_ = NULL;
 		fprintf(stderr, "ci>> ");
 	}
 	return 0;

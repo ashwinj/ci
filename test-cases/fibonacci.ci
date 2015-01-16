@@ -17,6 +17,12 @@ void fib(int n) {
 	}
 }
 
+void rec_fib(int n) {
+	int i;
+	if(i == 0 || i == 1) return 1;
+	else return (rec_fib(n-1)+rec_fib(n-2));
+}
+
 int main() {
 	int x;
 	printf("Enter the number:\t");

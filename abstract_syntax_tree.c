@@ -47,9 +47,9 @@ ast get_left_most_child(ast node) {
 void purge_ast(ast node) {
 	ast temp;
 	while(node->left_most_child != NULL) {
-		temp = get_left_most_sibling(node->left_most_child);
-		purge_ast(node->left_most_child);
-		node->left_most_child = temp;
+		temp = node->left_most_child;
+		node->left_most_child = get_left_most_sibling(temp);
+		purge_ast(temp);
 	}
 	free(node->ast_node_label);
 	free(node);
@@ -78,6 +78,13 @@ ast lookup_ast(char* label) {
 			return asts[j];
 		}
 	}
+}
+
+void purge_asts() {
+	int i;
+	for(i = 0; i < MAX_NO_OF_FUNCTIONS; i++)
+		if(asts[i] != NULL)
+			purge_ast(asts[i]);
 }
 
 char* toString(ast_node_tag tag) {

@@ -29,6 +29,12 @@ st* new_st(char* id) {
 }
 
 void purge_st(st* t) {
+	purge_st_entries(t);
+	free(t->symbol_table_id);
+	free(t);
+}
+
+void purge_st_entries(st* t) {
 	int i;
 	st_entry *temp, *next;
 	for(i = 0; i < SYMBOL_TABLE_HASH_SIZE; i++) {
@@ -39,8 +45,6 @@ void purge_st(st* t) {
 			temp = next;
 		}
 	}
-	free(t->symbol_table_id);
-	free(t);
 }
 
 void insert_st_entry(st* table, st_entry* te) {

@@ -50,6 +50,7 @@ st_entry* new_st_entry(symbol_token_tag stt, char* l, data_type set, symbol_valu
 void purge_st_entry(st_entry* te);
 st* new_st(char* id);
 void purge_st(st* t);
+void purge_st_entries(st* t);
 void insert_st_entry(st* table, st_entry* te);
 st_entry* lookup_st_entry(st* table, char* id);
 ar* new_ar(char* block_id);

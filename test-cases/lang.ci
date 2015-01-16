@@ -1,30 +1,22 @@
-int strlen(char* s) {
-	int i;
-	for(i = 0; s[i] != '\0'; i = i + 1);
-	return i;
-}
+int a[3][4] = {{1,2,3,4},{3,2,1,5},{2,3,4,6}};
+int b[4][3] = {{8,7,4},{6,4,5},{12,3,4},{9,3,2}};
 
-int strcmp(char* s1, char* s2) {
-	int i = 0;
-	int x = strlen(s1);
-	int y = strlen(s2);
-	while(s1[i] != '\0' || s2[i] != '\0') {
-		if(s1[i] != s2[i]) {
-			return (s1[i] - s2[i]);
+void print_mul(int** a, int** b, int row_a, int col_a, int col_b) {
+	int i, j, k;
+	int pro;
+	for(i = 0; i < row_a; i = i+1) {
+		for(j = 0; j < col_b; j = j+1) {
+			pro = 0;
+			for(k = 0; k < col_a; k = k+1) {
+				pro += a[i][k] * b[k][j];
+			}
+			printf("%d\t", pro);
 		}
-		i = i+1;
+		printf("\n\n");
 	}
-	return 0;
 }
 
 int main() {
-	int b;
-	char a[7] = {'d','u','r','g','\0'};
-	char d[8] = {'d','u','r','g','e','s','h','\0'};
-	if((b = strcmp(a,d)) == 0) {
-		printf("Dara Singh\t%d\n", b);
-	} else {
-		printf("Vindu Dara Singh\t%d\n", b);
-	}
+	print_mul(a, b, 3, 4, 3);
 	return 0;
 }

@@ -35,6 +35,7 @@ void set_left_most_sibling(ast node, ast lms);
 ast get_left_most_sibling(ast node);
 ast get_left_most_child(ast node);
 void purge_ast(ast node);
+void purge_asts();
 int set_ast_root_reference(ast node);
 ast lookup_ast(char* label);
 char* toString(ast_node_tag tag);
