@@ -45,6 +45,63 @@ value alloc_mem(data_type type, int units) {
 	case DOUBLE_PTR:
 		val._DOUBLE_2PTR = (double**)safe_malloc(sizeof(double*)*units);
 		return val;
+	case CHAR_2PTR:
+		val._CHAR_3PTR = (char***)safe_malloc(sizeof(char**)*units);
+		return val;
+	case SHORT_2PTR:
+		val._SHORT_3PTR = (short***)safe_malloc(sizeof(short**)*units);
+		return val;
+	case INT_2PTR:
+		val._INT_3PTR = (int***)safe_malloc(sizeof(int**)*units);
+		return val;
+	case LONG_2PTR:
+		val._LONG_3PTR = (long***)safe_malloc(sizeof(long**)*units);
+		return val;
+	case FLOAT_2PTR:
+		val._FLOAT_3PTR = (float***)safe_malloc(sizeof(float**)*units);
+		return val;
+	case DOUBLE_2PTR:
+		val._DOUBLE_3PTR = (double***)safe_malloc(sizeof(double**)*units);
+		return val;
+	}
+}
+
+value alloc_mem_for_2arr(data_type type, int rows, int cols) {
+	int i;
+	value val;
+	switch(type) {
+	case CHAR:
+		val._CHAR_2PTR = (char**)safe_malloc(sizeof(char*)*rows);
+		for(i = 0; i < rows; i++) 
+			*(val._CHAR_2PTR + i) = (char*)safe_malloc(sizeof(char)*cols);
+		return val;
+	case SHORT:
+		val._SHORT_2PTR = (short**)safe_malloc(sizeof(short*)*rows);
+		for(i = 0; i < rows; i++) 
+			*(val._SHORT_2PTR + i) = (short*)safe_malloc(sizeof(short)*cols);
+		return val;
+	case INT:
+		val._INT_2PTR = (int**)safe_malloc(sizeof(int*)*rows);
+		for(i = 0; i < rows; i++) 
+			*(val._INT_2PTR + i) = (int*)safe_malloc(sizeof(int)*cols);
+		return val;
+	case LONG:
+		val._LONG_2PTR = (long**)safe_malloc(sizeof(long*)*rows);
+		for(i = 0; i < rows; i++) 
+			*(val._LONG_2PTR + i) = (long*)safe_malloc(sizeof(long)*cols);
+		return val;
+	case FLOAT:
+		val._FLOAT_2PTR = (float**)safe_malloc(sizeof(float*)*rows);
+		for(i = 0; i < rows; i++) 
+			*(val._FLOAT_2PTR + i) = (float*)safe_malloc(sizeof(float)*cols);
+		return val;
+	case DOUBLE:
+		val._DOUBLE_2PTR = (double**)safe_malloc(sizeof(double*)*rows);
+		for(i = 0; i < rows; i++) 
+			*(val._DOUBLE_2PTR + i) = (double*)safe_malloc(sizeof(double)*cols);
+		return val;
+	//default:
+		//goto ERROR;
 	}
 }
 
@@ -78,6 +135,20 @@ data_type ptob(data_type type) {
 		return FLOAT_PTR;
 	case DOUBLE_2PTR:
 		return DOUBLE_PTR;
+	case VOID_3PTR:
+		return VOID_2PTR;
+	case CHAR_3PTR:
+		return CHAR_2PTR;
+	case SHORT_3PTR:
+		return SHORT_2PTR;
+	case INT_3PTR:
+		return INT_2PTR;
+	case LONG_3PTR:
+		return LONG_2PTR;
+	case FLOAT_3PTR:
+		return FLOAT_2PTR;
+	case DOUBLE_3PTR:
+		return DOUBLE_2PTR;
 	}
 }
 
@@ -111,6 +182,20 @@ data_type btop(data_type type) {
 		return FLOAT_2PTR;
 	case DOUBLE_PTR:
 		return DOUBLE_2PTR;
+	case VOID_2PTR:
+		return VOID_3PTR;
+	case CHAR_2PTR:
+		return CHAR_3PTR;
+	case SHORT_2PTR:
+		return SHORT_3PTR;
+	case INT_2PTR:
+		return INT_3PTR;
+	case LONG_2PTR:
+		return LONG_3PTR;
+	case FLOAT_2PTR:
+		return FLOAT_3PTR;
+	case DOUBLE_2PTR:
+		return DOUBLE_3PTR;
 	}
 }
 
@@ -121,7 +206,7 @@ data_type get_effective_type(data_type left_type, data_type right_type) {
 		return right_type;
 } 
  
-value get_const(data_type type, char * str) {
+value get_const(data_type type, char* str) {
 	char* dup;
 	value val;
 	switch(type) {
@@ -162,6 +247,25 @@ returnable* get_rval_from_entry(st_entry* e, int offset, int is_arr) {
 	returnable* ret = new_returnable();
 	ret->eval = get_val_from_entry(e, RVAL, offset, is_arr);
 	if(is_arr) ret->type = ptob(e->symbol_entry_type);
+	else ret->type = e->symbol_entry_type;
+	return ret;
+}
+
+returnable* get_2arr_lval_from_entry(st_entry* e, int row, int col, int is_ptr) {
+	returnable* ret = new_returnable();
+	ret->eval = get_2arr_val_from_entry(e, LVAL, row, col, is_ptr);
+	if(is_ptr) {
+		if(is_2pointer_type(e->symbol_entry_type)) ret->type = ptob(e->symbol_entry_type);
+		else ret->type = btop(e->symbol_entry_type);
+	}
+	else ret->type = btop(btop(e->symbol_entry_type));
+	return ret;
+}
+
+returnable* get_2arr_rval_from_entry(st_entry* e, int row, int col, int is_ptr) {
+	returnable* ret = new_returnable();
+	ret->eval = get_2arr_val_from_entry(e, RVAL, row, col, is_ptr);
+	if(is_2pointer_type(e->symbol_entry_type)) ret->type = ptob(ptob(e->symbol_entry_type));
 	else ret->type = e->symbol_entry_type;
 	return ret;
 }
@@ -245,8 +349,112 @@ value get_val_from_entry(st_entry* entry, int mode, int offset, int is_arr) {
 		else if(mode) val._DOUBLE_2PTR = entry->symbol_entry_value.var_val._DOUBLE_2PTR + offset;
 		else val._DOUBLE_PTR = *entry->symbol_entry_value.var_val._DOUBLE_2PTR + offset;
 		return val;
+	case VOID_2PTR:
+		if(mode) val._VOID_3PTR = entry->symbol_entry_value.var_val._VOID_3PTR + offset;
+		else val._VOID_2PTR = *entry->symbol_entry_value.var_val._VOID_3PTR + offset;
+		return val;
+	case CHAR_2PTR:
+		if(is_arr) val._CHAR_PTR = *(*entry->symbol_entry_value.var_val._CHAR_3PTR + offset);
+		else if(mode) val._CHAR_3PTR = entry->symbol_entry_value.var_val._CHAR_3PTR + offset;
+		else val._CHAR_2PTR = *entry->symbol_entry_value.var_val._CHAR_3PTR + offset;
+		return val;
+	case SHORT_2PTR:
+		if(is_arr) val._SHORT_PTR = *(*entry->symbol_entry_value.var_val._SHORT_3PTR + offset);
+		else if(mode) val._SHORT_3PTR = entry->symbol_entry_value.var_val._SHORT_3PTR + offset;
+		else val._SHORT_2PTR = *entry->symbol_entry_value.var_val._SHORT_3PTR + offset;
+		return val;
+	case INT_2PTR:
+		if(is_arr) val._INT_PTR = *(*entry->symbol_entry_value.var_val._INT_3PTR + offset);
+		else if(mode) val._INT_3PTR = entry->symbol_entry_value.var_val._INT_3PTR + offset;
+		else val._INT_2PTR = *entry->symbol_entry_value.var_val._INT_3PTR + offset;
+		return val;
+	case LONG_2PTR:
+		if(is_arr) val._LONG_PTR = *(*entry->symbol_entry_value.var_val._LONG_3PTR + offset);
+		else if(mode) val._LONG_3PTR = entry->symbol_entry_value.var_val._LONG_3PTR + offset;
+		else val._LONG_2PTR = *entry->symbol_entry_value.var_val._LONG_3PTR + offset;
+		return val;
+	case FLOAT_2PTR:
+		if(is_arr) val._FLOAT_PTR = *(*entry->symbol_entry_value.var_val._FLOAT_3PTR + offset);
+		else if(mode) val._FLOAT_3PTR = entry->symbol_entry_value.var_val._FLOAT_3PTR + offset;
+		else val._FLOAT_2PTR = *entry->symbol_entry_value.var_val._FLOAT_3PTR + offset;
+		return val;
+	case DOUBLE_2PTR:
+		if(is_arr) val._DOUBLE_PTR = *(*entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset);
+		else if(mode) val._DOUBLE_3PTR = entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset;
+		else val._DOUBLE_2PTR = *entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset;
+		return val;
 	//default:
 		//goto ERROR;
+	}
+}
+
+value get_2arr_val_from_entry(st_entry* entry, int mode, int row, int col, int is_ptr) {
+	value val;
+	switch(entry->symbol_entry_type) {
+	case VOID:
+		if(mode) val._VOID_PTR = NULL;
+		else val._INT = 0;
+		return val;
+	case CHAR:
+		if(is_ptr) val._CHAR_PTR = *(entry->symbol_entry_value.var_val._CHAR_2PTR + row)+col;
+		else if(mode) val._CHAR_2PTR = entry->symbol_entry_value.var_val._CHAR_2PTR + row;
+		else val._CHAR = *(*(entry->symbol_entry_value.var_val._CHAR_2PTR + row)+col);
+		return val;
+	case SHORT:
+		if(is_ptr) val._SHORT_PTR = *(entry->symbol_entry_value.var_val._SHORT_2PTR + row)+col;
+		else if(mode) val._SHORT_2PTR = entry->symbol_entry_value.var_val._SHORT_2PTR + row;
+		else val._SHORT = *(*(entry->symbol_entry_value.var_val._SHORT_2PTR + row)+col);
+		return val;
+	case INT:
+		if(is_ptr) val._INT_PTR = *(entry->symbol_entry_value.var_val._INT_2PTR + row)+col;
+		else if(mode) val._INT_2PTR = entry->symbol_entry_value.var_val._INT_2PTR + row;
+		else val._INT = *(*(entry->symbol_entry_value.var_val._INT_2PTR + row)+col);
+		return val;
+	case LONG:
+		if(is_ptr) val._LONG_PTR = *(entry->symbol_entry_value.var_val._LONG_2PTR + row)+col;
+		else if(mode) val._LONG_2PTR = entry->symbol_entry_value.var_val._LONG_2PTR + row;
+		else val._LONG = *(*(entry->symbol_entry_value.var_val._LONG_2PTR + row)+col);
+		return val;
+	case FLOAT:
+		if(is_ptr) val._FLOAT_PTR = *(entry->symbol_entry_value.var_val._FLOAT_2PTR + row)+col;
+		else if(mode) val._FLOAT_2PTR = entry->symbol_entry_value.var_val._FLOAT_2PTR + row;
+		else val._FLOAT = *(*(entry->symbol_entry_value.var_val._FLOAT_2PTR + row)+col);
+		return val;
+	case DOUBLE:
+		if(is_ptr) val._DOUBLE_PTR = *(entry->symbol_entry_value.var_val._DOUBLE_2PTR + row)+col;
+		else if(mode) val._DOUBLE_2PTR = entry->symbol_entry_value.var_val._DOUBLE_2PTR + row;
+		else val._DOUBLE = *(*(entry->symbol_entry_value.var_val._DOUBLE_2PTR + row)+col);
+		return val;
+	case CHAR_2PTR:
+		if(is_ptr) val._CHAR_PTR = *(*entry->symbol_entry_value.var_val._CHAR_3PTR + row)+col;
+		else if(mode) val._CHAR_2PTR = *entry->symbol_entry_value.var_val._CHAR_3PTR + row;
+		else val._CHAR = *(*(*entry->symbol_entry_value.var_val._CHAR_3PTR + row)+col);
+		return val;
+	case SHORT_2PTR:
+		if(is_ptr) val._SHORT_PTR = *(*entry->symbol_entry_value.var_val._SHORT_3PTR + row)+col;
+		else if(mode) val._SHORT_2PTR = *entry->symbol_entry_value.var_val._SHORT_3PTR + row;
+		else val._SHORT = *(*(*entry->symbol_entry_value.var_val._SHORT_3PTR + row)+col);
+		return val;
+	case INT_2PTR:
+		if(is_ptr) val._INT_PTR = *(*entry->symbol_entry_value.var_val._INT_3PTR + row)+col;
+		else if(mode) val._INT_2PTR = *entry->symbol_entry_value.var_val._INT_3PTR + row;
+		else val._INT = *(*(*entry->symbol_entry_value.var_val._INT_3PTR + row)+col);
+		return val;
+	case LONG_2PTR:
+		if(is_ptr) val._LONG_PTR = *(*entry->symbol_entry_value.var_val._LONG_3PTR + row)+col;
+		else if(mode) val._LONG_2PTR = *entry->symbol_entry_value.var_val._LONG_3PTR + row;
+		else val._LONG = *(*(*entry->symbol_entry_value.var_val._LONG_3PTR + row)+col);
+		return val;
+	case FLOAT_2PTR:
+		if(is_ptr) val._FLOAT_PTR = *(*entry->symbol_entry_value.var_val._FLOAT_3PTR + row)+col;
+		else if(mode) val._FLOAT_2PTR = *entry->symbol_entry_value.var_val._FLOAT_3PTR + row;
+		else val._FLOAT = *(*(*entry->symbol_entry_value.var_val._FLOAT_3PTR + row)+col);
+		return val;
+	case DOUBLE_2PTR:
+		if(is_ptr) val._DOUBLE_PTR = *(*entry->symbol_entry_value.var_val._DOUBLE_3PTR + row)+col;
+		else if(mode) val._DOUBLE_2PTR = *entry->symbol_entry_value.var_val._DOUBLE_3PTR + row;
+		else val._DOUBLE = *(*(*entry->symbol_entry_value.var_val._DOUBLE_3PTR + row)+col);
+		return val;
 	}
 }
 
@@ -370,6 +578,34 @@ returnable* get_assign_value(returnable* left, returnable* right) {
 		*(left->eval._DOUBLE_2PTR) = DOUBLE_PTR_VALUE(right);
 		ret->eval._DOUBLE_PTR = *(left->eval._DOUBLE_2PTR);
 		return ret;
+	case VOID_3PTR:
+		*(left->eval._VOID_3PTR) = VOID_2PTR_VALUE(right);
+		ret->eval._VOID_2PTR = *(left->eval._VOID_3PTR);
+		return ret;
+	case CHAR_3PTR:
+		*(left->eval._CHAR_3PTR) = CHAR_2PTR_VALUE(right);
+		ret->eval._CHAR_2PTR = *(left->eval._CHAR_3PTR);
+		return ret;		
+	case SHORT_3PTR:
+		*(left->eval._SHORT_3PTR) = SHORT_2PTR_VALUE(right);
+		ret->eval._SHORT_2PTR = *(left->eval._SHORT_3PTR);
+		return ret;		
+	case INT_3PTR:
+		*(left->eval._INT_3PTR) = INT_2PTR_VALUE(right);
+		ret->eval._INT_2PTR = *(left->eval._INT_3PTR);
+		return ret;		
+	case LONG_3PTR:
+		*(left->eval._LONG_3PTR) = LONG_2PTR_VALUE(right);
+		ret->eval._LONG_2PTR = *(left->eval._LONG_3PTR);
+		return ret;		
+	case FLOAT_3PTR:
+		*(left->eval._FLOAT_3PTR) = FLOAT_2PTR_VALUE(right);
+		ret->eval._FLOAT_2PTR = *(left->eval._FLOAT_3PTR);
+		return ret;		
+	case DOUBLE_3PTR:
+		*(left->eval._DOUBLE_3PTR) = DOUBLE_2PTR_VALUE(right);
+		ret->eval._DOUBLE_2PTR = *(left->eval._DOUBLE_3PTR);
+		return ret;
 	}
 }
 
@@ -414,6 +650,52 @@ void set_init_value(st_entry* entry, int offset, returnable* _init_) {
 	case DOUBLE_PTR:
 		*(entry->symbol_entry_value.var_val._DOUBLE_2PTR + offset) = DOUBLE_PTR_VALUE(_init_);
 		return;
+	case VOID_2PTR:
+		*(entry->symbol_entry_value.var_val._VOID_3PTR + offset) = VOID_2PTR_VALUE(_init_);
+		return;		
+	case CHAR_2PTR:
+		*(entry->symbol_entry_value.var_val._CHAR_3PTR + offset) = CHAR_2PTR_VALUE(_init_);
+		return;		
+	case SHORT_2PTR:
+		*(entry->symbol_entry_value.var_val._SHORT_3PTR + offset) = SHORT_2PTR_VALUE(_init_);
+		return;		
+	case INT_2PTR:
+		*(entry->symbol_entry_value.var_val._INT_3PTR + offset) = INT_2PTR_VALUE(_init_);
+		return;		
+	case LONG_2PTR:
+		*(entry->symbol_entry_value.var_val._LONG_3PTR + offset) = LONG_2PTR_VALUE(_init_);
+		return;		
+	case FLOAT_2PTR:
+		*(entry->symbol_entry_value.var_val._FLOAT_3PTR + offset) = FLOAT_2PTR_VALUE(_init_);
+		return;		
+	case DOUBLE_2PTR:
+		*(entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset) = DOUBLE_2PTR_VALUE(_init_);
+		return;
+	}
+}
+
+void set_2arr_init_value(st_entry* entry, int row, int col, returnable* _init_) {
+	switch(entry->symbol_entry_type) {	
+	case CHAR:
+		*(*(entry->symbol_entry_value.var_val._CHAR_2PTR + row) + col) = CHAR_VALUE(_init_);
+		return;		
+	case SHORT:
+		*(*(entry->symbol_entry_value.var_val._SHORT_2PTR + row) + col) = SHORT_VALUE(_init_);
+		return;		
+	case INT:
+		*(*(entry->symbol_entry_value.var_val._INT_2PTR + row) + col) = INT_VALUE(_init_);
+		return;		
+	case LONG:
+		*(*(entry->symbol_entry_value.var_val._LONG_2PTR + row) + col) = LONG_VALUE(_init_);
+		return;		
+	case FLOAT:
+		*(*(entry->symbol_entry_value.var_val._FLOAT_2PTR + row) + col) = FLOAT_VALUE(_init_);
+		return;		
+	case DOUBLE:
+		*(*(entry->symbol_entry_value.var_val._DOUBLE_2PTR + row) + col) = DOUBLE_VALUE(_init_);
+		return;
+	//default:
+		//goto ERROR;
 	}
 }
 
@@ -464,6 +746,30 @@ returnable* get_arithmetic_value(returnable* left, returnable* right, ast_node_t
 		return ret;
 	case DOUBLE_PTR:
 		ret->eval._DOUBLE_PTR = (double*)ptr_arithmetic_value((is_pointer_type(left->type) ? VOID_PTR_VALUE(left) : VOID_PTR_VALUE(right)),
+									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
+		return ret;
+	case CHAR_2PTR:
+		ret->eval._CHAR_2PTR = (char**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
+									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
+		return ret;
+	case SHORT_2PTR:
+		ret->eval._SHORT_2PTR = (short**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
+									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
+		return ret;
+	case INT_2PTR:
+		ret->eval._INT_2PTR = (int**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
+									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
+		return ret;
+	case LONG_2PTR:
+		ret->eval._LONG_2PTR = (long**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
+									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
+		return ret;
+	case FLOAT_2PTR:
+		ret->eval._FLOAT_2PTR = (float**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
+									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
+		return ret;
+	case DOUBLE_2PTR:
+		ret->eval._DOUBLE_2PTR = (double**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
 									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
 		return ret;
 	//default:
@@ -596,6 +902,17 @@ double double_arithmetic_value(double left, double right, ast_node_tag op) {
 }
 
 void* ptr_arithmetic_value(void* left, int right, ast_node_tag op) {
+	switch(op) {
+	case ADDITION:
+		return (left + right);
+	case SUBTRACTION:
+		return (left - right);
+	//default:
+		//goto ERROR;
+	}
+}
+
+void** ptr2_arithmetic_value(void** left, int right, ast_node_tag op) {
 	switch(op) {
 	case ADDITION:
 		return (left + right);

@@ -19,7 +19,7 @@
 
 #define MAIN_FUNCTION_LABEL 			  "main_func"
 #define PRINTF_LABEL 				     "printf"
-#define SCANF_LABEL 				      "scanf"
+#define SCANF_LABEL 				      "scanf"					    
 
 #include <stdlib.h>
 
@@ -30,7 +30,8 @@ typedef enum {
 	UNDEFINED, VOID, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, CHAR_ARR, SHORT_ARR, INT_ARR,
 	LONG_ARR, FLOAT_ARR, DOUBLE_ARR, VOID_PTR, CHAR_PTR, SHORT_PTR, INT_PTR, LONG_PTR, 
 	FLOAT_PTR, DOUBLE_PTR, AST_PTR, VOID_2PTR, CHAR_2PTR, SHORT_2PTR, INT_2PTR, LONG_2PTR, 
-	FLOAT_2PTR, DOUBLE_2PTR
+	FLOAT_2PTR, DOUBLE_2PTR, VOID_3PTR, CHAR_3PTR, SHORT_3PTR, INT_3PTR, LONG_3PTR, 
+	FLOAT_3PTR, DOUBLE_3PTR
 } data_type;
 
 typedef enum {
@@ -59,6 +60,13 @@ typedef union {
 	long** _LONG_2PTR;
 	float** _FLOAT_2PTR;
 	double** _DOUBLE_2PTR;
+	void*** _VOID_3PTR;
+	char*** _CHAR_3PTR;
+	short*** _SHORT_3PTR;
+	int*** _INT_3PTR;
+	long*** _LONG_3PTR;
+	float*** _FLOAT_3PTR;
+	double*** _DOUBLE_3PTR;
 } value;
 
 typedef struct returnable {

@@ -11,6 +11,8 @@ Acknowledgements:
 
 #include "abstract_syntax_tree.h"
 
+#define INTERPRETER_VERSION		"debug_v0.1"
+
 int _start_();
 int _interpret_();
 void set_main_ref(ast node);

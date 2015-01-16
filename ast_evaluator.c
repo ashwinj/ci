@@ -1,10 +1,10 @@
 /****************************************************************************************************
 
-	TODO: implement pre/post increment/decrement operations.
-	TODO: handle pointer variables. only uncommenting and book keeping required.
-	TODO: check double pointer support and resolve any undefined behaviour.
-	      REMEMBER:	double_pointers are not allowed in the language. they are for
-			VM's internal use.
+	TODO AND FIXME list:
+		shady implementation of 2d arrays and pointers.
+		shady implementation of type.
+		handle type casting statement.
+		implement pre/post increment/decrement operations.
 
 *****************************************************************************************************/
 
@@ -42,6 +42,7 @@ returnable* eval_var_rval(ast var_node) {
 		//if(entry == NULL) goto ERROR;
 	}
 	if(entry->symbol_entry_tag == _ARRAY) return get_lval_from_entry(entry, 0, 0);
+	else if(entry->symbol_entry_tag == _2ARRAY) return get_2arr_lval_from_entry(entry, 0, 0, 0);
 	else return get_rval_from_entry(entry, 0, 0);
 }
 
@@ -51,7 +52,8 @@ returnable* eval_var_lval(ast var_node) {
 		entry = lookup_st_entry(global_symbol_table, var_node->ast_node_label);
 		//if(entry == NULL) goto ERROR;
 	}
-	return get_lval_from_entry(entry, 0, 0);
+	if(entry->symbol_entry_tag == _2ARRAY) return get_2arr_lval_from_entry(entry, 0, 0, 0);
+	else return get_lval_from_entry(entry, 0, 0);
 }
 
 returnable* eval_arr_rval(ast arr_node) {
@@ -67,12 +69,15 @@ returnable* eval_arr_rval(ast arr_node) {
 	}
 	//if(left_ == NULL) goto ERROR;
 	left = eval_exp(left_, RVAL);
+	//if(!is_int_type(left->type)) goto ERROR;
 	if(entry->symbol_entry_tag == _VARIABLE) {
-		if(is_pointer_type(entry->symbol_entry_type)) 
+		if(is_1pointer_type(entry->symbol_entry_type)) 
+			return get_rval_from_entry(entry, left->eval._INT, 1);
+		else if(is_2pointer_type(entry->symbol_entry_type)) 
 			return get_rval_from_entry(entry, left->eval._INT, 1);
 		//else goto ERROR;
-	}
-	//if(!is_int_type(left->type)) goto ERROR;
+	} else if(entry->symbol_entry_tag == _2ARRAY)
+		return get_2arr_lval_from_entry(entry, left->eval._INT, 0, 1);
 	return get_rval_from_entry(entry, left->eval._INT, 0);
 }
 
@@ -89,13 +94,70 @@ returnable* eval_arr_lval(ast arr_node) {
 	}
 	//if(left_ == NULL) goto ERROR;
 	left = eval_exp(left_, RVAL);
+	//if(!is_int_type(left->type)) goto ERROR;
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_pointer_type(entry->symbol_entry_type)) 
 			return get_rval_from_entry(entry, left->eval._INT, 0);
+		else if(is_2pointer_type(entry->symbol_entry_type)) 
+			return get_rval_from_entry(entry, left->eval._INT, 0);
+		//else goto ERROR;
+	} else if(entry->symbol_entry_tag == _2ARRAY)
+			return get_2arr_lval_from_entry(entry, left->eval._INT, 0, 0);
+	return get_lval_from_entry(entry, left->eval._INT, 0);
+}
+
+returnable* eval_2arr_rval(ast arr_node) {
+	ast left_;
+	ast right_;
+	returnable* left = NULL;
+	returnable* right = NULL;
+	st_entry* entry;
+	//if(arr_node->tag != ARRAY2) goto ERROR;
+	left_ = get_left_most_child(arr_node);
+	//if(left_ == NULL) goto ERROR;
+	right_ = get_left_most_sibling(left_);
+	//if(right_ == NULL) goto ERROR;
+	entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, arr_node->ast_node_label);
+	if(entry == NULL) {
+		entry = lookup_st_entry(global_symbol_table, arr_node->ast_node_label);
+		//if(entry == NULL) goto ERROR;
+	}
+	left = eval_exp(left_, RVAL);
+	right = eval_exp(right_, RVAL);
+	//if(!is_int_type(left->type) || !is_int_type(right->type)) goto ERROR;
+	if(entry->symbol_entry_tag == _VARIABLE) {
+		if(is_2pointer_type(entry->symbol_entry_type)) 
+			return get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
 		//else goto ERROR;
 	}
-	//if(!is_int_type(left->type)) goto ERROR;
-	return get_lval_from_entry(entry, left->eval._INT, 0);
+	return get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
+}
+
+returnable* eval_2arr_lval(ast arr_node) {
+	ast left_;
+	ast right_;
+	returnable* left = NULL;
+	returnable* right = NULL;
+	st_entry* entry;
+	//if(arr_node->tag != ARRAY2) goto ERROR;
+	left_ = get_left_most_child(arr_node);
+	//if(left_ == NULL) goto ERROR;
+	right_ = get_left_most_sibling(left_);
+	//if(right_ == NULL) goto ERROR;
+	entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, arr_node->ast_node_label);
+	if(entry == NULL) {
+		entry = lookup_st_entry(global_symbol_table, arr_node->ast_node_label);
+		//if(entry == NULL) goto ERROR;
+	}
+	left = eval_exp(left_, RVAL);
+	right = eval_exp(right_, RVAL);
+	//if(!is_int_type(left->type) || !is_int_type(right->type)) goto ERROR;
+	if(entry->symbol_entry_tag == _VARIABLE) {
+		if(is_2pointer_type(entry->symbol_entry_type)) 
+			return get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
+		//else goto ERROR;
+	}
+	return get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
 }
 
 returnable* eval_func_call(ast node) {
@@ -187,6 +249,9 @@ returnable* eval_exp(ast exp_node, int mode) {
 	case ARRAY:
 		if(mode) return eval_arr_lval(exp_node);
 		else return eval_arr_rval(exp_node);
+	case ARRAY2:
+		if(mode) return eval_2arr_lval(exp_node);
+		else return eval_2arr_rval(exp_node);
 	case CONSTANT:
 		return eval_constant(exp_node);
 	case EXP_LIST:
@@ -637,7 +702,7 @@ int eval_var_decl(st* table, ast variable) {
 			init = NULL;
 		}
 		decl_var(table, t, var);
-		if(init != NULL) init_var(table, var->ast_node_label, init);
+		if(init != NULL) init_var(table, var, init);
 		temp = get_left_most_sibling(temp);
 	}
 	return 1;
@@ -647,9 +712,9 @@ int decl_var(st* table, data_type type, ast var) {
 	st_entry* entry;
 	symbol_value_type sev;
 	//if(lookup_st_entry(table, var->ast_node_label) != NULL) goto ERROR;
-	if(var->tag == ARRAY) {
-		decl_arr(table, type, var);
-	} else {
+	if(var->tag == ARRAY) decl_arr(table, type, var);
+	else if(var->tag == ARRAY2) decl_2arr(table, type, var);
+	else {
 		sev.var_val = alloc_mem(type, 1);
 		entry = new_st_entry(_VARIABLE, strdup(var->ast_node_label), type, sev);
 		insert_st_entry(table, entry);
@@ -662,7 +727,7 @@ int decl_arr(st* table, data_type type, ast var) {
 	returnable* ret;
 	st_entry* entry;
 	symbol_value_type sev;
-	//if(!is_basic_type(type)) goto ERROR;
+	//if(is_2pointer_type(type)) goto ERROR;
 	offset = get_left_most_child(var);
 	//if(offset == NULL) goto ERROR;
 	ret = eval_exp(offset, RVAL);
@@ -673,12 +738,35 @@ int decl_arr(st* table, data_type type, ast var) {
 	return 1;
 }
 
-int init_var(st* table, char* var, ast init_exp) {
+int decl_2arr(st* table, data_type type, ast var) {
+	int i;
+	ast offset1;
+	ast offset2;
+	returnable* ret1;
+	returnable* ret2;
+	st_entry* entry;
+	symbol_value_type sev;
+	//if(!is_basic_type(type)) goto ERROR;
+	offset1 = get_left_most_child(var);
+	//if(offset1 == NULL) goto ERROR;
+	offset2 = get_left_most_sibling(offset1);
+	//if(offset2 == NULL) goto ERROR;
+	ret1 = eval_exp(offset1, RVAL);
+	ret2 = eval_exp(offset2, RVAL);
+	//if(!is_int_type(ret1->type) || !is_int_type(ret2->type)) goto ERROR;
+	sev.var_val = alloc_mem_for_2arr(type, ret1->eval._INT, ret2->eval._INT);
+	entry = new_st_entry(_2ARRAY, strdup(var->ast_node_label), type, sev);
+	insert_st_entry(table, entry);
+	return 1;
+}
+
+int init_var(st* table, ast var, ast init_exp) {
 	st_entry* entry;
 	returnable* ret;
-	entry = lookup_st_entry(table, var);
+	entry = lookup_st_entry(table, var->ast_node_label);
 	//if(entry == NULL) goto ERROR;
-	if(entry->symbol_entry_tag == _ARRAY) init_arr(entry, init_exp);
+	if(entry->symbol_entry_tag == _ARRAY) init_arr(entry, var, init_exp);
+	else if (entry->symbol_entry_tag == _2ARRAY) init_2arr(entry, var, init_exp);
 	else {
 		//if(init_exp->tag == INIT_LIST) goto ERROR;
 		ret = eval_exp(init_exp, RVAL);
@@ -688,18 +776,62 @@ int init_var(st* table, char* var, ast init_exp) {
 	return 1;
 }
 
-int init_arr(st_entry* entry, ast init_list) {
+int init_arr(st_entry* entry, ast var, ast init_list) {
 	int i;
 	ast temp;
+	ast offset;
 	returnable* ret;
-	temp = get_left_most_child(init_list);
+	returnable* ret1;
 	//if(init_list->tag != INIT_LIST) goto ERROR;
-	for(i = 0; temp != NULL; i++) {
+	temp = get_left_most_child(init_list);
+	offset = get_left_most_child(var);
+	//if(offset == NULL) goto ERROR;
+	ret1 = eval_exp(offset, RVAL);
+	//if(!is_int_type(ret1->type)) goto ERROR;
+	for(i = 0; i < ret1->eval._INT && temp != NULL; i++) {
+		//if(temp->tag == INIT_LIST) goto ERROR;
 		ret = eval_exp(temp, RVAL);
 		//if(!is_compatible(entry->symbol_entry_type, ret->type)) goto ERROR;
 		set_init_value(entry, i, ret);
 		temp = get_left_most_sibling(temp);
 	}
+	//if(i < ret1->eval._INT || temp != NULL) goto ERROR;
+	return 1;
+}
+
+int init_2arr(st_entry* entry, ast var, ast init_init_list) {
+	int i, j;
+	ast outer;
+	ast inner;
+	ast offset1;
+	ast offset2;
+	ast init_list;
+	returnable* ret;
+	returnable* ret1;
+	returnable* ret2;
+	//if(init_init_list->tag != INIT_LIST) goto ERROR;
+	offset1 = get_left_most_child(var);
+	//if(offset1 == NULL) goto ERROR;
+	offset2 = get_left_most_sibling(offset1);
+	//if(offset2 == NULL) goto ERROR;
+	ret1 = eval_exp(offset1, RVAL);
+	ret2 = eval_exp(offset2, RVAL);
+	//if(!is_int_type(ret1->type) || !is_int_type(ret2->type)) goto ERROR;
+	outer = get_left_most_child(init_init_list);
+	for(i = 0; i < ret1->eval._INT || outer != NULL; i++) {
+		//if(outer->tag != INIT_LIST) goto ERROR;
+		inner = get_left_most_child(outer);
+		for(j = 0; j < ret2->eval._INT && inner != NULL; j++) {
+			//if(inner->tag == INIT_LIST) goto ERROR;
+			ret = eval_exp(inner, RVAL);
+			//if(!is_compatible(entry->symbol_entry_type, ret->type)) goto ERROR;
+			set_2arr_init_value(entry, i, j, ret);
+			inner = get_left_most_sibling(inner);
+		}
+		//if(j < ret2->eval._INT || inner != NULL) goto ERROR;
+		outer = get_left_most_sibling(outer);
+	}
+	//if(i < ret1->eval._INT || outer != NULL) goto ERROR;
 	return 1;
 }
 

@@ -23,12 +23,12 @@
 #define DOUBLE_PTR_VALUE(x) (x->type == DOUBLE_PTR ? x->eval._DOUBLE_PTR : FLOAT_PTR_VALUE(x))
 
 #define VOID_2PTR_VALUE(x) (x->eval._VOID_2PTR)
-#define CHAR_2PTR_VALUE(x) (x->type == CHAR_2PTR ? x->eval._CHAR_2PTR : VOID_2PTR_VALUE(x))
-#define SHORT_2PTR_VALUE(x) (x->type == SHORT_2PTR ? x->eval._SHORT_2PTR : CHAR_2PTR_VALUE(x))
-#define INT_2PTR_VALUE(x) (x->type == INT_2PTR ? x->eval._INT_2PTR : SHORT_2PTR_VALUE(x))
-#define LONG_2PTR_VALUE(x) (x->type == LONG_2PTR ? x->eval._LONG_2PTR : INT_2PTR_VALUE(x))
-#define FLOAT_2PTR_VALUE(x) (x->type == FLOAT_2PTR ? x->eval._FLOAT_2PTR : LONG_2PTR_VALUE(x))
-#define DOUBLE_2PTR_VALUE(x) (x->type == DOUBLE_2PTR ? x->eval._DOUBLE_2PTR : FLOAT_2PTR_VALUE(x))
+#define CHAR_2PTR_VALUE(x) (x->type == CHAR_2PTR ? x->eval._CHAR_2PTR : (char**)VOID_2PTR_VALUE(x))
+#define SHORT_2PTR_VALUE(x) (x->type == SHORT_2PTR ? x->eval._SHORT_2PTR : (short**)CHAR_2PTR_VALUE(x))
+#define INT_2PTR_VALUE(x) (x->type == INT_2PTR ? x->eval._INT_2PTR : (int**)SHORT_2PTR_VALUE(x))
+#define LONG_2PTR_VALUE(x) (x->type == LONG_2PTR ? x->eval._LONG_2PTR : (long**)INT_2PTR_VALUE(x))
+#define FLOAT_2PTR_VALUE(x) (x->type == FLOAT_2PTR ? x->eval._FLOAT_2PTR : (float**)LONG_2PTR_VALUE(x))
+#define DOUBLE_2PTR_VALUE(x) (x->type == DOUBLE_2PTR ? x->eval._DOUBLE_2PTR : (double**)FLOAT_2PTR_VALUE(x))
 
 #define is_int_type(type) ((type >= CHAR) && (type <= LONG))
 
@@ -40,7 +40,7 @@
 
 #define is_compatible(lval, rval) ((lval >= rval) || (is_int_type(lval) && is_int_type(rval)))
 #define is_lval_type(node) ((node->tag == VARIABLE) || ((node->tag == FUNCTION) && is_pointer_type(node->return_type) || \
-				(node->tag == ARRAY) || (node->tag == DEREFERENCE))
+			    (node->tag == ARRAY) || (node->tag == ARRAY2) || (node->tag == DEREFERENCE))
 
 #define is_additive_types(ltype, rtype) ((is_pointer_type(ltype) && is_int_type(rtype)) || \
 					 (is_pointer_type(rtype) && is_int_type(ltype)))
@@ -61,18 +61,23 @@
 #include <stdlib.h>
 
 value alloc_mem(data_type type, int units);
+value alloc_mem_for_2arr(data_type type, int rows, int cols);
 data_type ptob(data_type type);
 data_type btop(data_type type);
 data_type get_effective_type(data_type left_type, data_type right_type);
 value get_const(data_type type, char * str);
 returnable* get_lval_from_entry(st_entry* e, int offset, int is_arr);
 returnable* get_rval_from_entry(st_entry* e, int offset, int is_arr);
+returnable* get_2arr_lval_from_entry(st_entry* e, int row, int col, int is_ptr);
+returnable* get_2arr_rval_from_entry(st_entry* e, int row, int col, int is_ptr);
 returnable* get_lval_from_returnable(returnable* r, int offset);
 returnable* get_rval_from_returnable(returnable* e, int offset);
 value get_val_from_entry(st_entry* entry, int mode, int offset, int is_arr);
+value get_2arr_val_from_entry(st_entry* entry, int mode, int row, int col, int is_ptr);
 value get_val_from_returnable(returnable* ret, int mode, int offset);
 returnable* get_assign_value(returnable* left, returnable* right);
 void set_init_value(st_entry* entry, int offset, returnable* _init_);
+void set_2arr_init_value(st_entry* entry, int row, int col, returnable* _init_);
 returnable* get_arithmetic_value(returnable* left, returnable* right, ast_node_tag op);
 char char_arithmetic_value(char left, char right, ast_node_tag op);
 char short_arithmetic_value(short left, short right, ast_node_tag op);
@@ -81,6 +86,7 @@ long long_arithmetic_value(long left, long right, ast_node_tag op);
 float float_arithmetic_value(float left, float right, ast_node_tag op);
 double double_arithmetic_value(double left, double right, ast_node_tag op);
 void* ptr_arithmetic_value(void* left, int right, ast_node_tag op);
+void** ptr2_arithmetic_value(void** left, int right, ast_node_tag op);
 returnable* get_relational_value(returnable* left, returnable* right, ast_node_tag op);
 returnable* get_logical_value(returnable* left, returnable* right, ast_node_tag op);
 returnable* get_bitwise_value(returnable* left, returnable* right, ast_node_tag op);

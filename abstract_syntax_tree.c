@@ -15,6 +15,19 @@ ast new_ast(ast_node_tag t, char* l, data_type rt) {
 	return node;
 }
 
+ast copy_ast(ast node) {
+	ast dup;
+	ast left_dup;
+	ast sibling;
+	if(node == NULL) return NULL;
+	dup = new_ast(node->tag, node->ast_node_label, node->return_type);
+	left_dup = copy_ast(get_left_most_child(node));
+	set_left_most_child(dup, left_dup);
+	sibling = copy_ast(get_left_most_sibling(node));
+	set_left_most_sibling(dup, sibling);
+	return dup;
+}
+
 void set_left_most_child(ast node, ast lmc) {
 	node->left_most_child = lmc;
 }

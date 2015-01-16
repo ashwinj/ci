@@ -6,7 +6,7 @@
 ast new_constant_node(char* l, data_type rt);
 ast new_type_node(char* l, data_type rt);
 ast new_variable_node(char* l, data_type rt);
-ast new_array_variable_node(char* id, ast offset, data_type rt);
+ast new_array_variable_node(char* id, ast offset1, ast offset2, data_type rt);
 ast new_inc_exp_node(ast_node_tag tag, ast exp);
 ast new_dec_exp_node(ast_node_tag tag, ast exp);
 ast new_unary_exp_node(char op, ast exp);
