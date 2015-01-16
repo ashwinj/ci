@@ -16,7 +16,13 @@ int main(int argc, char **argv) {
 		a = _start_();
 	} else if (argc > 1) {
 		if(argv[1][0]=='-') {
-			/* handle options */
+			switch(argv[1][1]) {
+			case 'v':
+				publish_masthead();
+			case 'h':
+			default:
+				show_help();
+			}
 		} else if(!strcmp(argv[1]+strlen(argv[1])-3,".ci")) {
 			in = fopen(argv[1], "r");
 			a = _interpret_(in);

@@ -78,6 +78,13 @@ type
 	| FLOAT_TYPE '*'			{ $$ = new_type_node("float pointer", FLOAT_PTR); }
 	| DOUBLE_TYPE '*'			{ $$ = new_type_node("double pointer", DOUBLE_PTR); }
 	| LONG_TYPE '*'				{ $$ = new_type_node("long pointer", LONG_PTR); }
+	| VOID_TYPE '*' '*'			{ $$ = new_type_node("void 2 pointer", VOID_2PTR); }
+	| CHAR_TYPE '*'	'*'			{ $$ = new_type_node("char 2 pointer", CHAR_2PTR); }
+	| SHORT_TYPE '*' '*'			{ $$ = new_type_node("short 2 pointer", SHORT_2PTR); }
+	| INT_TYPE '*' '*'			{ $$ = new_type_node("int 2 pointer", INT_2PTR); }
+	| FLOAT_TYPE '*' '*'			{ $$ = new_type_node("float 2 pointer", FLOAT_2PTR); }
+	| DOUBLE_TYPE '*' '*'			{ $$ = new_type_node("double 2 pointer", DOUBLE_2PTR); }
+	| LONG_TYPE '*' '*'			{ $$ = new_type_node("long 2 pointer", LONG_2PTR); }
 	;
 
 primary_expression
@@ -88,33 +95,34 @@ primary_expression
 	;
 
 postfix_expression
-	: primary_expression			{ $$ = $1; }
-	| IDENTIFIER '[' expression ']'		{ $$ = new_array_variable_node($1, $3, UNDEFINED); }
-	| function_call				{ $$ = $1; }
-	| printf_call				{ $$ = $1; }	
-	| scanf_call				{ $$ = $1; }
-	| postfix_expression INC_OP		{ $$ = new_inc_exp_node(POST_INCREMENT, $1); }
-	| postfix_expression DEC_OP		{ $$ = new_dec_exp_node(POST_DECREMENT, $1); }
+	: primary_expression							{ $$ = $1; }
+	| IDENTIFIER '[' expression ']'						{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); }
+	| IDENTIFIER '[' expression ']' '[' expression ']'			{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); }
+	| function_call								{ $$ = $1; }
+	| printf_call								{ $$ = $1; }	
+	| scanf_call								{ $$ = $1; }
+	| postfix_expression INC_OP						{ $$ = new_inc_exp_node(POST_INCREMENT, $1); }
+	| postfix_expression DEC_OP						{ $$ = new_dec_exp_node(POST_DECREMENT, $1); }
 	;
 
 unary_expression
-	: postfix_expression			{ $$ = $1; }
-	| INC_OP unary_expression		{ $$ = new_inc_exp_node(PRE_INCREMENT, $2); }
-	| DEC_OP unary_expression		{ $$ = new_dec_exp_node(PRE_DECREMENT, $2); }
-	| unary_operator cast_expression	{ $$ = new_unary_exp_node($1, $2); }
+	: postfix_expression							{ $$ = $1; }
+	| INC_OP unary_expression						{ $$ = new_inc_exp_node(PRE_INCREMENT, $2); }
+	| DEC_OP unary_expression						{ $$ = new_dec_exp_node(PRE_DECREMENT, $2); }
+	| unary_operator cast_expression					{ $$ = new_unary_exp_node($1, $2); }
 	;
 
 unary_operator
-	: '&'					{ $$ = '&'; }
-	| '*'					{ $$ = '*'; }
-	| '-'					{ $$ = '-'; }
-	| '~'					{ $$ = '~'; }
-	| '!'					{ $$ = '!'; }
+	: '&'									{ $$ = '&'; }
+	| '*'									{ $$ = '*'; }
+	| '-'									{ $$ = '-'; }
+	| '~'									{ $$ = '~'; }
+	| '!'									{ $$ = '!'; }
 	;
 
 cast_expression
-	: unary_expression			{ $$ = $1; }
-	| '(' type ')' cast_expression		{ $$ = new_cast_node($2, $4); }
+	: unary_expression							{ $$ = $1; }
+	| '(' type ')' cast_expression						{ $$ = new_cast_node($2, $4); }
 	;
 
 multiplicative_expression
@@ -220,7 +228,8 @@ initializer_list
 
 declarator
 	: IDENTIFIER								{ $$ = new_variable_node($1, UNDEFINED); }
-	| IDENTIFIER '[' constant_expression ']'				{ $$ = new_array_variable_node($1, $3, UNDEFINED); }  
+	| IDENTIFIER '[' constant_expression ']'				{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); }
+	| IDENTIFIER '[' constant_expression ']' '[' constant_expression ']'	{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); }
 	;
 
 variable_declarator
@@ -323,7 +332,7 @@ global_declaration
 	;
 
 main_prototype
-	: MAIN_DEFINITION						{ $$ = NULL; /*set IN_MAIN flag here*/ }
+	: MAIN_DEFINITION						{ $$ = NULL; _main = TRUE; /*set IN_MAIN flag here*/ }
 	;
 
 main_definition
@@ -336,8 +345,8 @@ translation_unit
 	;
 
 script
-	: main_definition 						{ $$ = new_func_call_node(MAIN_FUNCTION_LABEL, NULL); set_main_ref($$); /* are these nodes required? */ }
-	| translation_unit main_definition				{ $$ = new_func_call_node(MAIN_FUNCTION_LABEL, NULL); set_main_ref($$); /* are these nodes required? */ }
+	: main_definition 						{ $$ = new_func_call_node(MAIN_FUNCTION_LABEL, NULL); set_main_ref($$); return 0; /* are these nodes required? */ }
+	| translation_unit main_definition				{ $$ = new_func_call_node(MAIN_FUNCTION_LABEL, NULL); set_main_ref($$); return 0; /* are these nodes required? */ }
 	;
 
 %%

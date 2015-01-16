@@ -17,9 +17,15 @@ ast new_variable_node(char* l, data_type rt) {
 	return new_ast(VARIABLE, l, rt);
 }
 
-ast new_array_variable_node(char* id, ast offset, data_type rt) {
-	ast arr_node = new_ast(ARRAY, id, rt);
-	set_left_most_child(arr_node, offset);
+ast new_array_variable_node(char* id, ast offset1, ast offset2, data_type rt) {
+	ast arr_node;
+	if(offset2 != NULL) {
+		set_left_most_sibling(offset1, offset2);
+		arr_node = new_ast(ARRAY2, id, rt);
+	} else {
+		arr_node = new_ast(ARRAY, id, rt);
+	}	
+	set_left_most_child(arr_node, offset1);
 	return arr_node;
 }
 
@@ -164,63 +170,63 @@ ast new_assign_exp_node(ast lval, assignment_code code, ast rval) {
 		temp_op_node = rval;
 		break;
 	case MUL_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
 		temp_op_node = new_mul_exp_node(lval, MULTIPLICATION, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case DIV_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
 		temp_op_node = new_mul_exp_node(lval, DIVISION, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case MOD_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
 		temp_op_node = new_mul_exp_node(lval, MODULO, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case ADD_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, ADDITION, temp_exp_node);
+		temp_op_node = new_add_exp_node(lval, ADDITION, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case SUB_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, SUBTRACTION, temp_exp_node);
+		temp_op_node = new_add_exp_node(lval, SUBTRACTION, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case LEFT_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, LEFT_SHIFT, temp_exp_node);
+		temp_op_node = new_shift_exp_node(lval, LEFT_SHIFT, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case RIGHT_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, RIGHT_SHIFT, temp_exp_node);
+		temp_op_node = new_shift_exp_node(lval, RIGHT_SHIFT, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case AND_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, BITWISE_AND, temp_exp_node);
+		temp_op_node = new_bit_exp_node(lval, BITWISE_AND, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case XOR_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, BITWISE_XOR, temp_exp_node);
+		temp_op_node = new_bit_exp_node(lval, BITWISE_XOR, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	case OR_ASSIGN_CODE:
-		temp_exp_node = new_ast(lval ->tag, lval->ast_node_label, lval->return_type);
+		temp_exp_node = copy_ast(lval);
 		set_left_most_sibling(temp_exp_node, rval);
-		temp_op_node = new_mul_exp_node(lval, BITWISE_OR, temp_exp_node);
+		temp_op_node = new_bit_exp_node(lval, BITWISE_OR, temp_exp_node);
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	}

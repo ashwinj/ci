@@ -2280,6 +2280,6 @@ void count()
 			column += 8 - (column % 8);
 		else
 			column++;
-	ECHO;
+	//ECHO;
 }
 

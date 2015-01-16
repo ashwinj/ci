@@ -12,7 +12,7 @@
 #define CONTEXT_RETURN_VALUE		((peek_ar())->return_value)
 
 typedef enum symbol_table_entry_token_tag {
-	_VARIABLE, _ARRAY, _FUNCTION
+	_VARIABLE, _ARRAY, _2ARRAY, _FUNCTION
 } symbol_token_tag;
 
 typedef union {

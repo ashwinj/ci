@@ -1,0 +1,30 @@
+int a[3][4] = {{1,2,3,4},{3,2,1,5},{2,3,4,6}};
+int b[4][3] = {{8,7,4},{6,4,5},{12,3,4},{9,3,2}};
+
+int main() {
+	int i, j, k;
+	int c[3][3];
+	int** d;
+	for(i = 0; i < 3; i = i+1) {
+		for(j = 0; j < 3; j = j+1) {
+			c[i][j] = 0;
+			for(k = 0; k < 4; k = k+1) {
+				c[i][j] += a[i][k] * b[k][j];
+			}
+		}
+	}
+	d = c;
+	for(i = 0; i < 3; i = i+1) {
+		for(j = 0; j < 3; j = j+1) {
+			printf("%d\t", c[i][j]);
+		}
+		printf("\n\n");
+	}
+	for(i = 0; i < 3; i = i+1) {
+		for(j = 0; j < 3; j = j+1) {
+			printf("%d\t", d[i][j]);
+		}
+		printf("\n\n");
+	}
+	return 0;
+}

@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include "vm.h"
 #include "interpreter.h"
 #include "abstract_syntax_tree.h"
 #include "ast_evaluator.h"
@@ -17,11 +18,20 @@ ast _main_ref_;
  */
 
 void publish_masthead() {
-	fprintf(stdout, "ci_debug-0.0.1\nci stands for c interpreter."
+	fprintf(stdout, "ci interpreter "INTERPRETER_VERSION
 			" Please excuse the authors for their lack of"
 			" imagination in naming.\n\t"
 			"@author  Ashwin Jha <ajha.dev@gmail.com>\n\t"
 			"@author  Durgesh Singh <blah@blah.blah>\n");
+}
+
+void show_help() {
+	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n"
+			"Usage:\n"
+			"Virtual Machine:\tci <ci script file with \".ci\" extension>\n"
+			"Interactive Session:\tci\n"
+			"Help:\t\t\tci -h\n"
+			"Version:\t\tci -v\n\n");
 }
 
 void set_main_ref(ast node) {
@@ -40,8 +50,8 @@ int _start_() {
 	/* this one not working correctly right now */
 	publish_masthead();
 	init(TRUE);
-	yyin=stdin;
 	fprintf(stderr, "ci>> ");
+	yyin=stdin;
 	while(1) {
 		yyparse();
 		if(_main_ref_ != NULL) eval_func_call(_main_ref_);

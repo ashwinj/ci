@@ -46,7 +46,9 @@ int eval_var_decl_list(st* table, ast vtdl);
 int eval_var_decl(st* table, ast variable);
 int decl_var(st* table, data_type type, ast var);
 int decl_arr(st* table, data_type type, ast var);
-int init_var(st* table, char* var, ast init_exp);
-int init_arr(st_entry* entry, ast init_list);
+int decl_2arr(st* table, data_type type, ast var);
+int init_var(st* table, ast var, ast init_exp);
+int init_arr(st_entry* entry, ast var, ast init_list);
+int init_2arr(st_entry* entry, ast var, ast init_init_list);
 
 #endif
