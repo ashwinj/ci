@@ -49,16 +49,17 @@ int _start_() {
 	/* print some shit and wait for user input */
 	/* this one not working correctly right now */
 	publish_masthead();
-	fprintf(stderr, "ci>> ");
+	print_prompt();
 	yyin=stdin;
 	while(1) {
 		init(TRUE);
 		yyparse();
-		if(_main_ref_ != NULL) eval_func_call(_main_ref_);
+		clear_ar_stack();
 		purge_st(global_symbol_table);
 		purge_asts();
 		_main_ref_ = NULL;
-		fprintf(stderr, "ci>> ");
+		fprintf(stdout, "Restarting\n\n");
+		print_prompt();
 	}
 	return 0;
 }

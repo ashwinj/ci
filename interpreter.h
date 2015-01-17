@@ -17,14 +17,15 @@
 #define DOUBLE_SIZE 			       sizeof(double)
 #define PTR_SIZE 				sizeof(char*)
 
-#define MAIN_FUNCTION_LABEL 			  "main_func"
+#define MAIN_FUNCTION_LABEL 			  "main"
 #define PRINTF_LABEL 				     "printf"
 #define SCANF_LABEL 				      "scanf"					    
 
 #include <stdlib.h>
 
-extern _main;
-extern _interact;
+extern int _main_env_;
+extern int _interact_env_;
+extern int _block_stmt;
 
 typedef enum {
 	UNDEFINED, VOID, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, CHAR_ARR, SHORT_ARR, INT_ARR,

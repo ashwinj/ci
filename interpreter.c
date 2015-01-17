@@ -6,15 +6,16 @@
 #include <string.h>
 
 
-int _main, _interact;
+int _main_env_, _interact_env_, _block_stmt;
 ar* activation_record_stack;
 
 void init(int isInteractiveSession) {
 	global_symbol_table = new_st(GLOBAL_SYMBOL_TABLE);
 	context_symbol_table = global_symbol_table;
 	activation_record_stack = NULL;
-	_main = FALSE;
-	_interact = isInteractiveSession;
+	_main_env_ = FALSE;
+	_interact_env_ = isInteractiveSession;
+	_block_stmt = 0;
 }
 
 int hash(char* message, int hash_size) {

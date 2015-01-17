@@ -5,7 +5,19 @@
 #include "ast_builder.h"
 #include "symbol_table.h"
 #include "vm.h"
+	
+#define main_interact_env			   		   (_main_env_ && _interact_env_)
+#define stmt_exec_env			      		      (main_interact_env && !_block_stmt)
+#define ctrl_stmt_exec_env				(main_interact_env && (_block_stmt == 1))
 
+#define is_inc_block_count				   {if(main_interact_env) _block_stmt++;}
+#define is_dec_block_count 				   {if(main_interact_env) _block_stmt--;}
+
+#define is_exec_return_stmt			    		    {if(stmt_exec_env) return 0;}
+#define is_check_return_env	{if(main_interact_env && CONTEXT_RETURN_VALUE != NULL) return 0;}
+
+void is_eval_stmt(ast node);
+void is_hndlr(ast node);
 //#define YYDEBUG 1
 %}
 
@@ -37,8 +49,9 @@
 %type <node> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
 %type <node> expression constant_expression initializer declarator variable_declarator variable_declaration statement compound_statement
 %type <node> expression_statement selection_statement iteration_statement jump_statement parameter function_definition function_call
-%type <node> global_declaration main_prototype main_definition translation_unit script initializer_list variable_declarator_list 
-%type <node> variable_declaration_list statement_list parameter_list argument_expression_list printf_call scanf_call
+%type <node> global_declaration main_prototype main_definition translation_unit script initializer_list variable_declarator_list if_key
+%type <node> variable_declaration_list statement_list parameter_list argument_expression_list printf_call scanf_call while_key for_key
+
 
 %type <unary_code> unary_operator
 
@@ -243,7 +256,7 @@ variable_declarator_list
 	;
 
 variable_declaration
-	: type variable_declarator_list ';'					{ $$ = new_decl_node($1, $2); }
+	: type variable_declarator_list ';'					{ $$ = new_decl_node($1, $2); is_eval_stmt($$); }
 	;
 
 variable_declaration_list
@@ -266,23 +279,35 @@ statement_list
 
 expression_statement
 	: ';'									{ $$ = new_exp_stmt_node(NULL); }
-	| expression ';'							{ $$ = new_exp_stmt_node($1); }
+	| expression ';'							{ $$ = new_exp_stmt_node($1); is_eval_stmt($$); }
+	;
+
+if_key
+	: IF									{ $$ = NULL; is_inc_block_count }
 	;
 
 selection_statement
-	: IF '(' expression ')' statement %prec LOWER_THAN_ELSE 		{ $$ = new_if_stmt_node($3, $5, NULL); }
-	| IF '(' expression ')' statement ELSE statement			{ $$ = new_if_stmt_node($3, $5, $7); }
+	: if_key '(' expression ')' statement %prec LOWER_THAN_ELSE 		{ $$ = new_if_stmt_node($3, $5, NULL); is_hndlr($$); is_check_return_env }
+	| if_key '(' expression ')' statement ELSE statement			{ $$ = new_if_stmt_node($3, $5, $7); is_hndlr($$); is_check_return_env }
+	;
+
+while_key
+	: WHILE									{ $$ = NULL; is_inc_block_count }
+	;
+
+for_key
+	: FOR									{ $$ = NULL; is_inc_block_count }
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement						{ $$ = new_while_stmt_node($3, $5); }
-	| FOR '(' expression_statement expression_statement ')' statement		{ $$ = new_for_stmt_node($3,$4,NULL,$6); }
-	| FOR '(' expression_statement expression_statement expression ')' statement	{ $$ = new_for_stmt_node($3,$4,$5,$7); }
+	: while_key '(' expression ')' statement					  	{ $$ = new_while_stmt_node($3, $5); is_hndlr($$); is_check_return_env }
+	| for_key '(' expression_statement expression_statement ')' statement		  	{ $$ = new_for_stmt_node($3,$4,NULL,$6);  is_hndlr($$); is_check_return_env }
+	| for_key '(' expression_statement expression_statement expression ')' statement  	{ $$ = new_for_stmt_node($3,$4,$5,$7); is_hndlr($$); is_check_return_env }
 	;
 
 jump_statement
-	: RETURN ';'							{ $$ = new_return_stmt_node(NULL); }
-	| RETURN expression ';'						{ $$ = new_return_stmt_node($2); }
+	: RETURN ';'							{ $$ = new_return_stmt_node(NULL); is_exec_return_stmt }
+	| RETURN expression ';'						{ $$ = new_return_stmt_node($2); is_exec_return_stmt }
 	| BREAK ';'							{ $$ = new_break_stmt_node(); }
 	| CONTINUE ';'							{ $$ = new_continue_stmt_node(); }
 	;
@@ -327,16 +352,16 @@ argument_expression_list
 	;
 
 global_declaration
-	: function_definition						{ $$ = $1; eval_func_def($$); if(_interact) print_prompt(); }
-	| variable_declaration						{ $$ = $1; eval_global_var_decl($$); if(_interact) print_prompt(); }
+	: function_definition						{ $$ = $1; eval_func_def($$); if(_interact_env_) print_prompt(); }
+	| variable_declaration						{ $$ = $1; eval_global_var_decl($$); if(_interact_env_) print_prompt(); }
 	;
 
 main_prototype
-	: MAIN_DEFINITION						{ $$ = NULL; _main = TRUE; /*set IN_MAIN flag here*/ }
+	: MAIN_DEFINITION						{ $$ = NULL; _main_env_ = TRUE; ar* record = new_ar(MAIN_FUNCTION_LABEL); push_ar(record); /*set IN_MAIN flag here*/ }
 	;
 
 main_definition
-	: main_prototype compound_statement				{ $$ = new_main_def_node($2); eval_main_def($$); }
+	: main_prototype compound_statement				{ $$ = new_main_def_node($2); eval_main_def($$); is_exec_return_stmt }
 	;
 
 translation_unit
@@ -355,9 +380,27 @@ extern char yytext[];
 extern int column;
 //int yydebug=1;
 
-yyerror(s)
-char *s;
-{
+yyerror(char* s) {
 	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);
+}
+
+void is_eval_stmt(ast node) {
+	if(ctrl_stmt_exec_env) {
+		if(node->tag == IF_STATEMENT || node->tag == WHILE_STATEMENT || node->tag == FOR_STATEMENT) {
+			eval_stmt(node);
+			print_prompt();
+		} //else goto ERROR;
+	} else if(stmt_exec_env) {
+		if(node->tag == EXPRESSION_STATEMENT) eval_exp_stmt(node);
+		else if(node->tag == RETURN_STATEMENT) eval_return_stmt(node);
+		else if(node->tag == DECLARATION) eval_var_decl(CONTEXT_SYMBOL_TABLE, node);
+		//else goto ERROR;
+		print_prompt();
+	} //else goto ERROR;
+}
+
+void is_hndlr(ast node) {
+	is_eval_stmt(node);
+	is_dec_block_count
 }

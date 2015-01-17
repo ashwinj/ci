@@ -36,13 +36,13 @@ void purge_st(st* t) {
 
 void purge_st_entries(st* t) {
 	int i;
-	st_entry *temp, *next;
+	st_entry *temp, *cur;
 	for(i = 0; i < SYMBOL_TABLE_HASH_SIZE; i++) {
 		temp = t->entry[i];
 		while(temp!=NULL) {
-			next = temp->next;
-			purge_st_entry(temp);
-			temp = next;
+			cur = temp;
+			temp = temp->next;
+			purge_st_entry(cur);
 		}
 	}
 }
@@ -87,6 +87,15 @@ void purge_ar(ar* a) {
 void push_ar(ar* a) {
 	a->next = activation_record_stack;
 	activation_record_stack = a;
+}
+
+void clear_ar_stack() {
+	ar* a;
+	while(activation_record_stack != NULL) {
+		a = activation_record_stack;
+		activation_record_stack = activation_record_stack->next;
+		purge_ar(a);
+	}
 }
 
 ar* pop_ar() {
