@@ -100,8 +100,8 @@ value alloc_mem_for_2arr(data_type type, int rows, int cols) {
 		for(i = 0; i < rows; i++) 
 			*(val._DOUBLE_2PTR + i) = (double*)safe_malloc(sizeof(double)*cols);
 		return val;
-	//default:
-		//goto ERROR;
+	default:
+		err();
 	}
 }
 
@@ -383,8 +383,9 @@ value get_val_from_entry(st_entry* entry, int mode, int offset, int is_arr) {
 		else if(mode) val._DOUBLE_3PTR = entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset;
 		else val._DOUBLE_2PTR = *entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset;
 		return val;
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
+		err();
 	}
 }
 
@@ -455,6 +456,9 @@ value get_2arr_val_from_entry(st_entry* entry, int mode, int row, int col, int i
 		else if(mode) val._DOUBLE_2PTR = *entry->symbol_entry_value.var_val._DOUBLE_3PTR + row;
 		else val._DOUBLE = *(*(*entry->symbol_entry_value.var_val._DOUBLE_3PTR + row)+col);
 		return val;
+	default:
+		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
+		err();
 	}
 }
 
@@ -517,8 +521,9 @@ value get_val_from_returnable(returnable* ret, int mode, int offset) {
 		if(mode) val._DOUBLE_2PTR = ret->eval._DOUBLE_2PTR + offset;
 		else val._DOUBLE_PTR = *ret->eval._DOUBLE_2PTR + offset;
 		return val;
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
+		err();
 	}
 }
 
@@ -671,6 +676,9 @@ void set_init_value(st_entry* entry, int offset, returnable* _init_) {
 	case DOUBLE_2PTR:
 		*(entry->symbol_entry_value.var_val._DOUBLE_3PTR + offset) = DOUBLE_2PTR_VALUE(_init_);
 		return;
+	default:
+		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
+		err();
 	}
 }
 
@@ -694,8 +702,9 @@ void set_2arr_init_value(st_entry* entry, int row, int col, returnable* _init_) 
 	case DOUBLE:
 		*(*(entry->symbol_entry_value.var_val._DOUBLE_2PTR + row) + col) = DOUBLE_VALUE(_init_);
 		return;
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
+		err();
 	}
 }
 
@@ -704,7 +713,10 @@ returnable* get_arithmetic_value(returnable* left, returnable* right, ast_node_t
 	ret->type = get_effective_type(left->type, right->type);
 	void* l;
 	int i;
-	//if(op == SUBTRACTION && is_pointer_type(ret->type) && ret->type == right->type) goto ERROR;
+	if(op == SUBTRACTION && is_pointer_type(ret->type) && ret->type == right->type) {
+		err_msg = "RUNTIME EXCEPTION: Invalid opeartion over pointer.\n\n";
+		err();
+	}
 	switch(ret->type) {
 	case CHAR:
 		ret->eval._CHAR = char_arithmetic_value(CHAR_VALUE(left), CHAR_VALUE(right), op);
@@ -772,8 +784,9 @@ returnable* get_arithmetic_value(returnable* left, returnable* right, ast_node_t
 		ret->eval._DOUBLE_2PTR = (double**)ptr2_arithmetic_value((is_2pointer_type(left->type) ? VOID_2PTR_VALUE(left) : VOID_2PTR_VALUE(right)),
 									(is_int_type(left->type) ? INT_VALUE(left) : INT_VALUE(right)), op);
 		return ret;
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
+		err();
 	}
 }
 
@@ -782,10 +795,16 @@ char char_arithmetic_value(char left, char right, ast_node_tag op) {
 	case MULTIPLICATION:
 		return (left * right);
 	case DIVISION:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return left/right;
 	case MODULO:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return (left % right);
 	case ADDITION:
 		return (left + right);
@@ -805,10 +824,16 @@ char short_arithmetic_value(short left, short right, ast_node_tag op) {
 	case MULTIPLICATION:
 		return (left * right);
 	case DIVISION:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return left/right;
 	case MODULO:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return (left % right);
 	case ADDITION:
 		return (left + right);
@@ -828,10 +853,16 @@ int int_arithmetic_value(int left, int right, ast_node_tag op) {
 	case MULTIPLICATION:
 		return (left * right);
 	case DIVISION:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return left/right;
 	case MODULO:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return (left % right);
 	case ADDITION:
 		return (left + right);
@@ -851,10 +882,16 @@ long long_arithmetic_value(long left, long right, ast_node_tag op) {
 	case MULTIPLICATION:
 		return (left * right);
 	case DIVISION:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return left/right;
 	case MODULO:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return (left % right);
 	case ADDITION:
 		return (left + right);
@@ -874,7 +911,10 @@ float float_arithmetic_value(float left, float right, ast_node_tag op) {
 	case MULTIPLICATION:
 		return (left * right);
 	case DIVISION:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return left/right;
 	case ADDITION:
 		return (left + right);
@@ -890,7 +930,10 @@ double double_arithmetic_value(double left, double right, ast_node_tag op) {
 	case MULTIPLICATION:
 		return (left * right);
 	case DIVISION:
-		//if(right == 0) goto ERROR;
+		if(right == 0) {
+			err_msg = "RUNTIME EXCEPTION: Divide by 0.\n\n";
+			err();
+		}
 		return left/right;
 	case ADDITION:
 		return (left + right);
@@ -907,8 +950,9 @@ void* ptr_arithmetic_value(void* left, int right, ast_node_tag op) {
 		return (left + right);
 	case SUBTRACTION:
 		return (left - right);
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "Invalid arithmetic operation over pointer types.\n\n";
+		err();
 	}
 }
 
@@ -918,8 +962,9 @@ void** ptr2_arithmetic_value(void** left, int right, ast_node_tag op) {
 		return (left + right);
 	case SUBTRACTION:
 		return (left - right);
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "Invalid arithmetic operation over pointer types.\n\n";
+		err();
 	}
 }
 
@@ -986,7 +1031,10 @@ returnable* lib_printf(returnable* param_list) {
 	char flag = 1;
 	returnable* ret;
 	returnable* param = param_list;
-	//if(param == NULL || param->type != CHAR_PTR) goto ERROR;
+	if(param == NULL || param->type != CHAR_PTR) {
+		err_msg = "RUNTIME EXCEPTION: Invalid parameters to printf. First parameter must be a format string.\n\n";
+		err();
+	}
 	str = param->eval._CHAR_PTR;
 	param = param->next;
 	len = strlen(str);
@@ -994,62 +1042,72 @@ returnable* lib_printf(returnable* param_list) {
 		if(str[i] == '%') {
 			switch(str[i+1]) {
 			case 'c':
-				//if(param == NULL) goto ERROR;
-				//if(!is_compatible(param->type, CHAR)) goto ERROR; 
-				//else {
+				if(param == NULL || !is_compatible(param->type, CHAR)) {
+					err_msg = "RUNTIME EXCEPTION: Char type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += printf("%c", param->eval._CHAR);
 					i += 2;
 					break;
-				//}
+				}
 			case 'd':
-				//if(param == NULL) goto ERROR;
-				//if(!is_compatible(param->type, INT)) goto ERROR;
-				//else {
+				if(param == NULL || !is_compatible(param->type, INT)) {
+					err_msg = "RUNTIME EXCEPTION: Int type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += printf("%d", param->eval._INT);
 					i += 2;
 					break;
-				//}
+				}
 			case 'f':
-				//if(param == NULL) goto ERROR;
-				//if(!is_compatible(param->type, FLOAT)) goto ERROR;
-				//else {
+				if(param == NULL || !is_compatible(param->type, FLOAT)) {
+					err_msg = "RUNTIME EXCEPTION: Float type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += printf("%f", param->eval._FLOAT);
 					i += 2;
 					break;
-				//}
+				}
 			case 'l':
 				if(str[i+2] == 'd') {
-					//if(param == NULL) goto ERROR;
-					//if(!is_compatible(param->type, LONG)) goto ERROR;
-					//else {
+					if(param == NULL || !is_compatible(param->type, LONG)) {
+						err_msg = "RUNTIME EXCEPTION: Long type parameter expected.\n\n";
+						err(); 
+					} else {
 						count += printf("%ld", param->eval._LONG);
 						i += 3;
 						break;
-					//}
+					}
 				} else if(str[i+2] == 'f') {				
-					//if(param == NULL) goto ERROR;
-					//if(!is_compatible(param->type, DOUBLE)) goto ERROR;
-					//else {
+					if(param == NULL || !is_compatible(param->type, DOUBLE)) {
+						err_msg = "RUNTIME EXCEPTION: Double type parameter expected.\n\n";
+						err(); 
+					} else {
 						count += printf("%lf", param->eval._DOUBLE);						
 						i += 3;
 						break;
-					//}
-				} //else goto ERROR;
+					}
+				} else {
+					err_msg = "RUNTIME EXCEPTION: Invalid use of %%l.\n\n";
+					err(); 
+				} 
 			case 's':
-				//if(param == NULL) goto ERROR;
-				//if(param->type != CHAR_PTR) goto ERROR;
-				//else {
+				if(param == NULL || param->type != CHAR_PTR) {
+					err_msg = "RUNTIME EXCEPTION: Char pointer type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += printf("%s", param->eval._CHAR_PTR);
 					i += 2;
 					break;
-				//}
+				}
 			case '%':
 				count += printf("%%");
 				flag = 0;
 				i += 2;
 				break;
-			//default:
-				//goto ERROR;				
+			default:
+				err_msg = "RUNTIME EXCEPTION: Invalid use of %%.\n\n";
+				err();				
 			}
 			if(flag && param != NULL) param = param->next;
 			else flag = 1;
@@ -1088,8 +1146,9 @@ returnable* lib_printf(returnable* param_list) {
 			case '?':
 				count += printf("\?");
 				break;
-			//default:
-				//goto ERROR;				
+			default:
+				err_msg = "RUNTIME EXCEPTION: Invalid use of \\.\n\n";
+				err();				
 			}
 			i += 2;
 		} else {
@@ -1108,69 +1167,84 @@ returnable* lib_scanf(returnable* param_list) {
 	char* str;	
 	returnable* ret;
 	returnable* param = param_list;
-	//if(param == NULL || param->type != CHAR_PTR) goto ERROR;
+	if(param == NULL || param->type != CHAR_PTR) {
+		err_msg = "RUNTIME EXCEPTION: Invalid parameters to scanf. First parameter must be a format string.\n\n";
+		err();
+	}
 	str = param->eval._CHAR_PTR;
 	param = param->next;
 	len = strlen(str);
 	while (len > i) {
-		//if(str[i] != '%') goto ERROR;
-		//else {
+		if(str[i] != '%') {
+			err_msg = "RUNTIME EXCEPTION: %% expected.\n\n";
+			err();
+		} else {
 			switch(str[i+1]) {
 			case 'c':
-				//if(param == NULL) goto ERROR;
-				//if(!is_compatible(param->type, CHAR_PTR)) goto ERROR; 
-				//else {
+				if(param == NULL || !is_compatible(param->type, CHAR_PTR)) {
+					err_msg = "RUNTIME EXCEPTION: Char pointer type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += scanf("%c", param->eval._CHAR_PTR);
 					i += 2;
 					break;
-				//}
+				}
 			case 'd':
-				//if(param == NULL) goto ERROR;
-				//if(!is_compatible(param->type, INT_PTR)) goto ERROR;
-				//else {
+				if(param == NULL || !is_compatible(param->type, INT_PTR)) {
+					err_msg = "RUNTIME EXCEPTION: Int pointer type parameter expected.\n\n";
+					err();
+				} else {
 					count += scanf("%d", param->eval._INT_PTR);
 					i += 2;
 					break;
-				//}
+				}
 			case 'f':
-				//if(param == NULL) goto ERROR;
-				//if(!is_compatible(param->type, FLOAT_PTR)) goto ERROR;
-				//else {
+				if(param == NULL || !is_compatible(param->type, FLOAT_PTR)) {
+					err_msg = "RUNTIME EXCEPTION: Float pointer type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += scanf("%f", param->eval._FLOAT_PTR);
 					i += 2;
 					break;
-				//}
+				}
 			case 'l':
 				if(str[i+2]=='d') {
-					//if(param == NULL) goto ERROR;
-					//if(!is_compatible(param->type, LONG_PTR)) goto ERROR;
-					//else {
+					if(param == NULL || !is_compatible(param->type, LONG_PTR)) {
+						err_msg = "RUNTIME EXCEPTION: Long pointer type parameter expected.\n\n";
+						err(); 
+					} else {
 						count += scanf("%ld", param->eval._LONG_PTR);
 						i += 3;
 						break;
-					//}
+					}
 				} else if(str[i+2]=='f') {				
-					//if(param == NULL) goto ERROR;
-					//if(!is_compatible(param->type, DOUBLE_PTR)) goto ERROR;
-					//else {
+					if(param == NULL || !is_compatible(param->type, DOUBLE_PTR)) {
+						err_msg = "RUNTIME EXCEPTION: Double pointer type parameter expected.\n\n";
+						err(); 
+					} else {
 						count += scanf("%lf", param->eval._DOUBLE_PTR);						
 						i += 3;
 						break;
-					//}
-				} //else goto ERROR;
+					}
+				} else {
+					err_msg = "RUNTIME EXCEPTION: Invalid use of %%l.\n\n";
+					err(); 
+				} 
 			case 's':
-				//if(param == NULL) goto ERROR;
-				//if(param->type != CHAR_PTR) goto ERROR;
-				//else {
+				if(param == NULL || !is_compatible(param->type, CHAR_PTR)) {
+					err_msg = "RUNTIME EXCEPTION: Char pointer type parameter expected.\n\n";
+					err(); 
+				} else {
 					count += scanf("%s", param->eval._CHAR_PTR);
 					i += 2;
 					break;
-				//}
-			//default:
-				//goto ERROR;				
+				}
+			default:
+				err_msg = "RUNTIME EXCEPTION: Invalid use of %%.\n\n";
+				err();				
 			}
 			if(param != NULL) param = param->next;
-		//}
+		}
 	}
 	ret = new_returnable();
 	ret->type = INT;
@@ -1235,7 +1309,10 @@ char* get_unquoted_string(char* s) {
 
 char get_char(char* s) {
 	int x = strlen(s);
-	//if(x <= 2) goto ERROR;
+	if(x <= 2) {
+		err_msg = "RUNTIME EXCEPTION: Invalid char \'\'.\n\n";
+		err();
+	}
 	if(s[1] == '\\' && x >= 3) {
 		switch(s[2]) {
 		case '0':
@@ -1244,9 +1321,20 @@ char get_char(char* s) {
 			if(x>= 4 && s[3] == '\'') return s[3];
 			else if(x>= 4 && s[3] == '\"') return s[3];
 			else return s[2];
-		//default:
-			//goto ERROR;
+		default:
+			err_msg = "RUNTIME EXCEPTION: Invalid escape sequence.\n\n";
+			err();
 		}
 	} else return s[1];
 }
 
+
+int get_param_list_size(returnable* ret) {
+	int i = 0;
+	returnable* temp = ret;
+	while(temp != NULL) {
+		i++;
+		temp = temp->next;
+	}
+	return i;
+}

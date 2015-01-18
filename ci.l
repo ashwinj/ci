@@ -18,7 +18,7 @@ static void comment();
 %%
 "/*"			{ comment(); }
 
-"int main()"		{ count(); return(MAIN_DEFINITION); }
+"main"			{ count(); return(MAIN_FUNCTION); }
 "printf"		{ count(); return(LIB_PRINTF); }
 "scanf"			{ count(); return(LIB_SCANF); }
 
@@ -130,6 +130,7 @@ static void comment(void)
 }
 
 
+int row = 1;
 int column = 0;
 
 void count()
@@ -137,11 +138,12 @@ void count()
 	int i;
 
 	for (i = 0; yytext[i] != '\0'; i++)
-		if (yytext[i] == '\n')
+		if (yytext[i] == '\n') {
+			row++;
 			column = 0;
-		else if (yytext[i] == '\t')
+		} else if (yytext[i] == '\t') {
 			column += 8 - (column % 8);
-		else
+		} else
 			column++;
 	//ECHO;
 }

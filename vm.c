@@ -18,11 +18,9 @@ ast _main_ref_;
  */
 
 void publish_masthead() {
-	fprintf(stdout, "ci interpreter "INTERPRETER_VERSION
-			" Please excuse the authors for their lack of"
-			" imagination in naming.\n\t"
+	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n\t"
 			"@author  Ashwin Jha <ajha.dev@gmail.com>\n\t"
-			"@author  Durgesh Singh <blah@blah.blah>\n");
+			"@author  Durgesh Singh <blah@blah.blah>\n\n");
 }
 
 void show_help() {
@@ -35,39 +33,41 @@ void show_help() {
 }
 
 void set_main_ref(ast node) {
-	//if(_main_ref_ == NULL)
+	if(_main_ref_ == NULL)
 		_main_ref_ = node;
-	//else
-		//goto ERROR;
+	else {
+		err_msg = "No main declaration block.\n\n";
+		err();
+	}
 }
 
 void print_prompt() {
-	fprintf(stderr, "ci>> ");
+	fprintf(stdout, "ci>> ");
 }
 
 int _start_() {
-	/* print some shit and wait for user input */
-	/* this one not working correctly right now */
 	publish_masthead();
 	print_prompt();
 	yyin=stdin;
 	while(1) {
 		init(TRUE);
 		yyparse();
-		clear_ar_stack();
-		purge_st(global_symbol_table);
-		purge_asts();
+		purge_vmds();
 		_main_ref_ = NULL;
-		fprintf(stdout, "Restarting\n\n");
-		print_prompt();
+		fprintf(stdout, "\nBye bye!!\n\n");
+		break;
 	}
 	return 0;
 }
 
 int _interpret_(FILE* in) {
 	/* go on interpreting */
+	int i = -1;
 	init(FALSE);
 	yyin=in;
 	yyparse();
-	return eval_func_call(_main_ref_)->eval._INT;
+	i =  eval_func_call(_main_ref_)->eval._INT;
+	purge_vmds();
+	_main_ref_ = NULL;
+	return i;
 }

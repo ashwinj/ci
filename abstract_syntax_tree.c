@@ -65,8 +65,8 @@ int set_ast_root_reference(ast node) {
 			return j;
 		}
 	}
-	return -1;
-	// handle stack overflow case
+	err_msg = "RUNTIME EXCEPTION: Stack overflow.\n\n";
+	err();
 }
 
 ast lookup_ast(char* label) {

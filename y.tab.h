@@ -45,7 +45,7 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    MAIN_DEFINITION = 258,
+    MAIN_FUNCTION = 258,
     LIB_PRINTF = 259,
     LIB_SCANF = 260,
     CHAR_CONSTANT = 261,
@@ -97,7 +97,7 @@ extern int yydebug;
   };
 #endif
 /* Tokens.  */
-#define MAIN_DEFINITION 258
+#define MAIN_FUNCTION 258
 #define LIB_PRINTF 259
 #define LIB_SCANF 260
 #define CHAR_CONSTANT 261
