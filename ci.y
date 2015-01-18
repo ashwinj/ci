@@ -28,7 +28,7 @@ void is_hndlr(ast node);
 	assignment_code assign_code;
 }
 
-%token MAIN_DEFINITION LIB_PRINTF LIB_SCANF
+%token MAIN_FUNCTION LIB_PRINTF LIB_SCANF
 
 %token <string> CHAR_CONSTANT HEX_INT_CONSTANT OCT_INT_CONSTANT DEC_INT_CONSTANT
 %token <string> HEX_LONG_CONSTANT OCT_LONG_CONSTANT DEC_LONG_CONSTANT FLOAT_CONSTANT
@@ -357,7 +357,7 @@ global_declaration
 	;
 
 main_prototype
-	: MAIN_DEFINITION						{ $$ = NULL; _main_env_ = TRUE; ar* record = new_ar(MAIN_FUNCTION_LABEL); push_ar(record); /*set IN_MAIN flag here*/ }
+	: INT_TYPE MAIN_FUNCTION '(' ')'				{ $$ = NULL; _main_env_ = TRUE; if(_interact_env_) print_prompt(); ar* record = new_ar(MAIN_FUNCTION_LABEL); push_ar(record); /*set IN_MAIN flag here*/ }
 	;
 
 main_definition
@@ -378,11 +378,12 @@ script
 
 extern char yytext[];
 extern int column;
+extern int row;
 //int yydebug=1;
 
 yyerror(char* s) {
 	fflush(stdout);
-	printf("\n%*s\n%*s\n", column, "^", column, s);
+	printf("\nSYNTACTICAL EXCEPTION: Syntax error at line %d, column %d\n", row, column);
 }
 
 void is_eval_stmt(ast node) {
@@ -390,14 +391,13 @@ void is_eval_stmt(ast node) {
 		if(node->tag == IF_STATEMENT || node->tag == WHILE_STATEMENT || node->tag == FOR_STATEMENT) {
 			eval_stmt(node);
 			print_prompt();
-		} //else goto ERROR;
+		}
 	} else if(stmt_exec_env) {
 		if(node->tag == EXPRESSION_STATEMENT) eval_exp_stmt(node);
 		else if(node->tag == RETURN_STATEMENT) eval_return_stmt(node);
 		else if(node->tag == DECLARATION) eval_var_decl(CONTEXT_SYMBOL_TABLE, node);
-		//else goto ERROR;
 		print_prompt();
-	} //else goto ERROR;
+	}
 }
 
 void is_hndlr(ast node) {

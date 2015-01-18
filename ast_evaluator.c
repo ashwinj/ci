@@ -20,26 +20,33 @@
 returnable* eval_constant(ast const_node) {
 	value val;
 	returnable* ret;
-	//if(const_node->tag != CONSTANT) goto ERROR;
-	//else {
+	if(const_node->tag != CONSTANT) {
+		err_msg = "INTERNAL EXCEPTION: CONSTANT node expected.\n\n";
+		err();
+	} else {
 		val = get_const(const_node->return_type, const_node->ast_node_label);
 		ret = new_returnable();
 		ret->type = const_node->return_type;
 		ret->eval = val;
 		return ret;
-	//}
+	}
 }
 
 data_type eval_type(ast type_node) {
-	//if(type_node->tag != TYPE) goto ERROR;
-	/*else */return type_node->return_type;
+	if(type_node->tag != TYPE) {
+		err_msg = "INTERNAL EXCEPTION: TYPE node expected.\n\n";
+		err();
+	} else return type_node->return_type;
 }
 
 returnable* eval_var_rval(ast var_node) {
 	st_entry* entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, var_node->ast_node_label);
 	if(entry == NULL) {
 		entry = lookup_st_entry(global_symbol_table, var_node->ast_node_label);
-		//if(entry == NULL) goto ERROR;
+		if(entry == NULL) {
+			err_msg = "RUNTIME EXCEPTION: Variable not defined in this context.\n\n";
+			err();
+		}
 	}
 	if(entry->symbol_entry_tag == _ARRAY) return get_lval_from_entry(entry, 0, 0);
 	else if(entry->symbol_entry_tag == _2ARRAY) return get_2arr_lval_from_entry(entry, 0, 0, 0);
@@ -50,7 +57,10 @@ returnable* eval_var_lval(ast var_node) {
 	st_entry* entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, var_node->ast_node_label);
 	if(entry == NULL) {
 		entry = lookup_st_entry(global_symbol_table, var_node->ast_node_label);
-		//if(entry == NULL) goto ERROR;
+		if(entry == NULL) {
+			err_msg = "RUNTIME EXCEPTION: Variable not defined in this context.\n\n";
+			err();
+		}
 	}
 	if(entry->symbol_entry_tag == _2ARRAY) return get_2arr_lval_from_entry(entry, 0, 0, 0);
 	else return get_lval_from_entry(entry, 0, 0);
@@ -60,22 +70,37 @@ returnable* eval_arr_rval(ast arr_node) {
 	ast left_;
 	returnable* left;
 	st_entry* entry;
-	//if(arr_node->tag != ARRAY) goto ERROR;
+	if(arr_node->tag != ARRAY) {
+		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
+		err();
+	}
 	left_ = get_left_most_child(arr_node);
 	entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, arr_node->ast_node_label);
 	if(entry == NULL) {
 		entry = lookup_st_entry(global_symbol_table, arr_node->ast_node_label);
-		//if(entry == NULL) goto ERROR;
+		if(entry == NULL) {
+			err_msg = "RUNTIME EXCEPTION: Variable not defined in this context.\n\n";
+			err();
+		}
 	}
-	//if(left_ == NULL) goto ERROR;
+	if(left_ == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Offset node expected.\n\n";
+		err();
+	}
 	left = eval_exp(left_, RVAL);
-	//if(!is_int_type(left->type)) goto ERROR;
+	if(!is_int_type(left->type)) {
+		err_msg = "RUNTIME EXCEPTION: Offset can't be a non int type.\n\n";
+		err();
+	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_1pointer_type(entry->symbol_entry_type)) 
 			return get_rval_from_entry(entry, left->eval._INT, 1);
 		else if(is_2pointer_type(entry->symbol_entry_type)) 
 			return get_rval_from_entry(entry, left->eval._INT, 1);
-		//else goto ERROR;
+		else {
+			err_msg = "RUNTIME EXCEPTION: Basic type variables can't be used as array variables.\n\n";
+			err();
+		}
 	} else if(entry->symbol_entry_tag == _2ARRAY)
 		return get_2arr_lval_from_entry(entry, left->eval._INT, 0, 1);
 	return get_rval_from_entry(entry, left->eval._INT, 0);
@@ -85,22 +110,37 @@ returnable* eval_arr_lval(ast arr_node) {
 	ast left_;
 	returnable* left;
 	st_entry* entry;
-	//if(arr_node->tag != ARRAY) goto ERROR;
+	if(arr_node->tag != ARRAY) {
+		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
+		err();
+	}
 	left_ = get_left_most_child(arr_node);
 	entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, arr_node->ast_node_label);
 	if(entry == NULL) {
 		entry = lookup_st_entry(global_symbol_table, arr_node->ast_node_label);
-		//if(entry == NULL) goto ERROR;
+		if(entry == NULL) {
+			err_msg = "RUNTIME EXCEPTION: Variable not defined in this context.\n\n";
+			err();
+		}
 	}
-	//if(left_ == NULL) goto ERROR;
+	if(left_ == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Offset node expected.\n\n";
+		err();
+	}
 	left = eval_exp(left_, RVAL);
-	//if(!is_int_type(left->type)) goto ERROR;
+	if(!is_int_type(left->type)) {
+		err_msg = "RUNTIME EXCEPTION: Offset can't be a non int type.\n\n";
+		err();
+	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_pointer_type(entry->symbol_entry_type)) 
 			return get_rval_from_entry(entry, left->eval._INT, 0);
 		else if(is_2pointer_type(entry->symbol_entry_type)) 
 			return get_rval_from_entry(entry, left->eval._INT, 0);
-		//else goto ERROR;
+		else {
+			err_msg = "RUNTIME EXCEPTION: Basic type variables can't be used as array variables.\n\n";
+			err();
+		}
 	} else if(entry->symbol_entry_tag == _2ARRAY)
 			return get_2arr_lval_from_entry(entry, left->eval._INT, 0, 0);
 	return get_lval_from_entry(entry, left->eval._INT, 0);
@@ -112,23 +152,41 @@ returnable* eval_2arr_rval(ast arr_node) {
 	returnable* left = NULL;
 	returnable* right = NULL;
 	st_entry* entry;
-	//if(arr_node->tag != ARRAY2) goto ERROR;
+	if(arr_node->tag != ARRAY2) {
+		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
+		err();
+	}
 	left_ = get_left_most_child(arr_node);
-	//if(left_ == NULL) goto ERROR;
+	if(left_ == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Row offset node expected.\n\n";
+		err();
+	}
 	right_ = get_left_most_sibling(left_);
-	//if(right_ == NULL) goto ERROR;
+	if(right_ == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Column offset node expected.\n\n";
+		err();
+	}
 	entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, arr_node->ast_node_label);
 	if(entry == NULL) {
 		entry = lookup_st_entry(global_symbol_table, arr_node->ast_node_label);
-		//if(entry == NULL) goto ERROR;
+		if(entry == NULL) {
+			err_msg = "RUNTIME EXCEPTION: Variable not defined in this context.\n\n";
+			err();
+		}
 	}
 	left = eval_exp(left_, RVAL);
 	right = eval_exp(right_, RVAL);
-	//if(!is_int_type(left->type) || !is_int_type(right->type)) goto ERROR;
+	if(!is_int_type(left->type) || !is_int_type(right->type)) {
+		err_msg = "RUNTIME EXCEPTION: Offset can't be a non int type.\n\n";
+		err();
+	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_2pointer_type(entry->symbol_entry_type)) 
 			return get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
-		//else goto ERROR;
+		else {
+			err_msg = "RUNTIME EXCEPTION: Only double pointer type variables can be used as 2d array variables.\n\n";
+			err();
+		}
 	}
 	return get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
 }
@@ -139,23 +197,41 @@ returnable* eval_2arr_lval(ast arr_node) {
 	returnable* left = NULL;
 	returnable* right = NULL;
 	st_entry* entry;
-	//if(arr_node->tag != ARRAY2) goto ERROR;
+	if(arr_node->tag != ARRAY2) {
+		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
+		err();
+	}
 	left_ = get_left_most_child(arr_node);
-	//if(left_ == NULL) goto ERROR;
+	if(left_ == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Row offset node expected.\n\n";
+		err();
+	}
 	right_ = get_left_most_sibling(left_);
-	//if(right_ == NULL) goto ERROR;
+	if(right_ == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Row offset node expected.\n\n";
+		err();
+	}
 	entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, arr_node->ast_node_label);
 	if(entry == NULL) {
 		entry = lookup_st_entry(global_symbol_table, arr_node->ast_node_label);
-		//if(entry == NULL) goto ERROR;
+		if(entry == NULL) {
+			err_msg = "RUNTIME EXCEPTION: Variable not defined in this context.\n\n";
+			err();
+		}
 	}
 	left = eval_exp(left_, RVAL);
 	right = eval_exp(right_, RVAL);
-	//if(!is_int_type(left->type) || !is_int_type(right->type)) goto ERROR;
+	if(!is_int_type(left->type) || !is_int_type(right->type)) {
+		err_msg = "RUNTIME EXCEPTION: Offset can't be a non int type.\n\n";
+		err();
+	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_2pointer_type(entry->symbol_entry_type)) 
 			return get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
-		//else goto ERROR;
+		else {
+			err_msg = "RUNTIME EXCEPTION: Only double pointer type variables can be used as 2d array variables.\n\n";
+			err();
+		}
 	}
 	return get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
 }
@@ -172,7 +248,13 @@ returnable* eval_func_call(ast node) {
 	else param_list = NULL;
 	if(is_lib_func(node->ast_node_label)) return exec_lib_func(node->ast_node_label, param_list);
 	entry = lookup_st_entry(global_symbol_table, node->ast_node_label);				
-	//if(entry == NULL || entry->symbol_entry_tag != _FUNCTION) goto ERROR;			
+	if(entry == NULL) {
+		err_msg = "RUNTIME EXCEPTION: Function not defined in this context.\n\n";
+		err();
+	} else if(entry->symbol_entry_tag != _FUNCTION) {
+		err_msg = "RUNTIME EXCEPTION: Not defined as a function.\n\n";
+		err();
+	}
 	func_def = asts[entry->symbol_entry_value.ast_ref_index];
 	record = new_ar(strdup(entry->symbol_entry_label));
 	push_ar(record);
@@ -195,17 +277,22 @@ int exec_func(ast func_def, returnable* param_list) {
 	st_entry* entry;
 	returnable* p = param_list;
 	int x = (eval_constant(get_left_most_child(func_def)))->eval._INT;
-	//if((!x && p != NULL) || (x && p == NULL) || (x && p != NULL && x != get_list_size(p))) goto ERROR;
+	if((!x && p != NULL) || (x && p == NULL) || (x && p != NULL && x != get_param_list_size(p))) {
+		err_msg = "RUNTIME EXCEPTION: Invalid number of parameters to function.\n\n";
+		err();
+	}
 	temp = get_left_most_sibling(get_left_most_child(func_def));
 	param = get_left_most_child(temp);
 	while(x && p != NULL) {
 		eval_var_decl(CONTEXT_SYMBOL_TABLE, param);
 		var = get_left_most_child(get_left_most_sibling(get_left_most_child(param)));
 		entry = lookup_st_entry(CONTEXT_SYMBOL_TABLE, var->ast_node_label);
-		//if(!is_compatible(entry->symbol_entry_type,p->type)) goto ERROR;
-		//else {
+		if(!is_compatible(entry->symbol_entry_type,p->type)) {
+			err_msg = "RUNTIME EXCEPTION: Incompatible parameter type in function call.\n\n";
+			err();
+		} else {
 			set_init_value(entry, 0, p);
-		//}
+		}
 		p = p->next;
 		param = get_left_most_sibling(param);
 		x--;
@@ -221,7 +308,11 @@ int exec_func(ast func_def, returnable* param_list) {
 returnable* exec_lib_func(char* func, returnable* param_list) {
 	if(!strcmp(func, PRINTF_LABEL)) return lib_printf(param_list);
 	else if(!strcmp(func, SCANF_LABEL)) return lib_scanf(param_list);
-	//else goto ERROR;
+	else {
+		// this won't get called!!
+		err_msg = "INTERNAL EXCEPTION: Boolean function is not working dude.";
+		err();
+	}
 }
 
 returnable* eval_param_list(ast param_list) {
@@ -312,6 +403,9 @@ returnable* eval_exp(ast exp_node, int mode) {
 	case POST_DECREMENT:
 	case CALL:
 		return eval_func_call(exp_node);
+	default:
+		err_msg = "INTERNAL EXCEPTION: I wonder why this statement got filtered out.\n\n";
+		err();
 	}
 }
 
@@ -345,11 +439,17 @@ returnable* eval_assign_exp(ast node) {
 	returnable* right;
 	returnable* ret;
 	left_ = get_left_most_child(node);
-	//if(!is_lval_type(left_)) goto ERROR;
+	if(!is_lval_type(left_)) {
+		err_msg = "RUNTIME EXCEPTION: Not a valid LVALUE.\n\n";
+		err();
+	}
 	right_ = get_left_most_sibling(left_);
 	left = eval_exp(left_, LVAL);
 	right = eval_exp(right_, RVAL);
-	//if(!is_compatible(ptob(left->type),right->type)) goto ERROR;
+	if(!is_compatible(ptob(left->type),right->type)) {
+		err_msg = "RUNTIME EXCEPTION: Types incompatible for assignment opeartion.\n\n";
+		err();
+	}
 	ret = get_assign_value(left, right);
 	return ret;
 }	
@@ -364,12 +464,13 @@ returnable* eval_arithmetic_exp(ast node) {
 	right_ = get_left_most_sibling(left_);
 	left = eval_exp(left_, RVAL);
 	right = eval_exp(right_, RVAL);
-	//if(is_arithmetic_type(ret->type)) {
+	if(is_arithmetic_types(left->type, right->type)) {
 		ret = get_arithmetic_value(left, right, node->tag);
 		return ret;
-	/*} else {
-		goto ERROR;
-	}*/
+	} else {
+		err_msg = "RUNTIME EXCEPTION: Incompatible types for arithmetic operations.\n\n";
+		err();
+	}
 }
 
 returnable* eval_shift_exp(ast node) {
@@ -382,12 +483,13 @@ returnable* eval_shift_exp(ast node) {
 	right_ = get_left_most_sibling(left_);
 	left = eval_exp(left_, RVAL);
 	right = eval_exp(right_, RVAL);
-	//if(is_int_type(left->type) && is_int_type(right->type)) {
+	if(is_int_type(left->type) && is_int_type(right->type)) {
 		ret = get_arithmetic_value(left, right, node->tag);
 		return ret;
-	/*} else {
-		goto ERROR;
-	}*/
+	} else {
+		err_msg = "RUNTIME EXCEPTION: Incompatible types for shift operations.\n\n";
+		err();
+	}
 }	
 
 returnable* eval_rel_exp(ast node) {
@@ -400,12 +502,13 @@ returnable* eval_rel_exp(ast node) {
 	right_ = get_left_most_sibling(left_);
 	left = eval_exp(left_, RVAL);
 	right = eval_exp(right_, RVAL);
-	//if(is_compatible(left->type,right->type)) {
+	if(is_compatible(left->type,right->type)) {
 		ret = get_relational_value(left, right, node->tag);
 		return ret;
-	/*} else {
-		goto ERROR;
-	}*/
+	} else {
+		err_msg = "RUNTIME EXCEPTION: Incompatible types for relational operations.\n\n";
+		err();
+	}
 }
 
 returnable* eval_bitwise_exp(ast node) {
@@ -418,12 +521,13 @@ returnable* eval_bitwise_exp(ast node) {
 	right_ = get_left_most_sibling(left_);
 	left = eval_exp(left_, RVAL);
 	if(right_ != NULL) right = eval_exp(right_, RVAL);
-	//if(is_int_type(left->type) && is_int_type(right->type)) {
+	if(is_int_type(left->type) && is_int_type(right->type)) {
 		ret = get_bitwise_value(left, right, node->tag);
 		return ret;
-	/*} else {
-		goto ERROR;
-	}*/
+	} else {
+		err_msg = "RUNTIME EXCEPTION: Incompatible types for bitwise operations.\n\n";
+		err();
+	}
 }
 
 returnable* eval_logical_exp(ast node) {
@@ -449,7 +553,10 @@ returnable* eval_conditional_exp(ast node) {
 	true_case_ = get_left_most_sibling(condition_);
 	false_case_= get_left_most_sibling(true_case_);
 	condition = eval_exp(condition_, RVAL);
-	//if(condition->type != INT) goto ERROR; 
+	if(condition->type != INT) {
+		err_msg = "RUNTIME EXCEPTION: Condition should evaluate to int.\n\n";
+		err(); 
+	}
 	if(condition->eval._INT)
 		return (eval_exp(true_case_, RVAL));
 	else
@@ -460,7 +567,10 @@ returnable* eval_unary_minus_exp(ast node) {
 	returnable* exp;
 	returnable* ret;
 	exp=eval_exp(get_left_most_child(node), RVAL);
-	//if(!is_arithmetic_type(exp)) goto ERROR;
+	if(!is_basic_type(exp->type)) {
+		err_msg = "RUNTIME EXCEPTION: Incompatible type for unary minus operation.\n\n";
+		err();
+	}
  	ret = get_arithmetic_value(exp,NULL,node->tag);
 	return ret;
 }
@@ -470,7 +580,10 @@ returnable* eval_deref_exp(ast node, int mode) {
 	returnable* left;
 	left_ = get_left_most_child(node);
 	left = eval_exp(left_, RVAL);
-	//if(!is_pointer_type(left->type)) goto ERROR;
+	if(!is_pointer_type(left->type)) {
+		err_msg = "RUNTIME EXCEPTION: Pointer value expected.\n\n";
+		err();
+	}
 	if(mode == RVAL) {
 		return get_rval_from_returnable(left, 0);
 	} else {
@@ -483,7 +596,10 @@ returnable* eval_ref_exp(ast node) {
 	returnable* left;
 	left_ = get_left_most_child(node);
 	left = eval_exp(left_, LVAL);
-	//if(!is_pointer_type(left->type)) goto ERROR;
+	if(!is_pointer_type(left->type)) {
+		err_msg = "RUNTIME EXCEPTION: Pointer value expected.\n\n";
+		err();
+	}
 	return left;
 }
 
@@ -508,8 +624,9 @@ int eval_stmt(ast stmt_node) {
 		return eval_stmt_list(stmt_node);
 	case EXPRESSION_STATEMENT:
 		return eval_exp_stmt(stmt_node);
-	//default:
-		//goto ERROR;
+	default:
+		err_msg = "INTERNAL EXCEPTION: I wonder why this statement got filtered out.\n\n";
+		err();
 	}
 }
 
@@ -575,7 +692,10 @@ int eval_if_stmt(ast node) {
 	true_case_= get_left_most_sibling(condition_);
 	false_case_= get_left_most_sibling(true_case_);
 	condition = eval_exp(condition_, RVAL);
-	//if(condition->type != INT) goto ERROR; 
+	if(condition->type != INT) {
+		err_msg = "RUNTIME EXCEPTION: Condition should evaluate to int.\n\n";
+		err(); 
+	}
 	if(condition->eval._INT)
 		eval_stmt(true_case_);
 	else
@@ -675,14 +795,16 @@ int eval_context_var_decl_list(ast context_decl) {
 
 int eval_var_decl_list(st* table, ast vtdl) {
 	ast temp;
-	//if(!vdl->tag == VAR_TYPE_DECL_LIST) goto ERROR;
-	//else {
+	if(!vtdl->tag == VAR_TYPE_DECL_LIST) {
+		err_msg = "INTERNAL EXCEPTION: Variable declaration list expected.\n\n";
+		err();
+	} else {
 		temp = get_left_most_child(vtdl);
 		while(temp != NULL) {
 			eval_var_decl(table, temp);
 			temp = get_left_most_sibling(temp);
 		}
-	//}
+	}
 	return 1;
 }
 
@@ -711,7 +833,10 @@ int eval_var_decl(st* table, ast variable) {
 int decl_var(st* table, data_type type, ast var) {
 	st_entry* entry;
 	symbol_value_type sev;
-	//if(lookup_st_entry(table, var->ast_node_label) != NULL) goto ERROR;
+	if(lookup_st_entry(table, var->ast_node_label) != NULL) {
+		err_msg = "RUNTIME EXCEPTION: Variable already declared in this context.\n\n";
+		err();
+	}
 	if(var->tag == ARRAY) decl_arr(table, type, var);
 	else if(var->tag == ARRAY2) decl_2arr(table, type, var);
 	else {
@@ -727,11 +852,24 @@ int decl_arr(st* table, data_type type, ast var) {
 	returnable* ret;
 	st_entry* entry;
 	symbol_value_type sev;
-	//if(is_2pointer_type(type)) goto ERROR;
+	if(!is_basic_type(type)) {
+		err_msg = "RUNTIME EXCEPTION: Arrays can only be of basic types.\n\n";
+		err();
+	}
 	offset = get_left_most_child(var);
-	//if(offset == NULL) goto ERROR;
+	if(offset == NULL) {
+		err_msg = "RUNTIME EXCEPTION: Array size required.\n\n";
+		err();
+	}
 	ret = eval_exp(offset, RVAL);
-	//if(!is_int_type(ret->type)) goto ERROR;
+	if(!is_int_type(ret->type)) {
+		err_msg = "RUNTIME EXCEPTION: Array size should be an int.\n\n";		
+		err();
+	}
+	if(ret->eval._INT == 0) {
+		err_msg = "RUNTIME EXCEPTION: Arrays can't have size less than 1.\n\n";		
+		err();
+	}	
 	sev.var_val = alloc_mem(type, ret->eval._INT);
 	entry = new_st_entry(_ARRAY, strdup(var->ast_node_label), type, sev);
 	insert_st_entry(table, entry);
@@ -746,14 +884,30 @@ int decl_2arr(st* table, data_type type, ast var) {
 	returnable* ret2;
 	st_entry* entry;
 	symbol_value_type sev;
-	//if(!is_basic_type(type)) goto ERROR;
+	if(!is_basic_type(type)) {
+		err_msg = "RUNTIME EXCEPTION: Arrays can only be of basic types.\n\n";
+		err();
+	}
 	offset1 = get_left_most_child(var);
-	//if(offset1 == NULL) goto ERROR;
+	if(offset1 == NULL) {
+		err_msg = "RUNTIME EXCEPTION: Array row size required.\n\n";
+		err();
+	}
 	offset2 = get_left_most_sibling(offset1);
-	//if(offset2 == NULL) goto ERROR;
+	if(offset2 == NULL) {
+		err_msg = "RUNTIME EXCEPTION: Array column size required.\n\n";
+		err();
+	}
 	ret1 = eval_exp(offset1, RVAL);
 	ret2 = eval_exp(offset2, RVAL);
-	//if(!is_int_type(ret1->type) || !is_int_type(ret2->type)) goto ERROR;
+	if(!is_int_type(ret1->type) || !is_int_type(ret2->type)) {
+		err_msg = "RUNTIME EXCEPTION: Array row and column sizes should be an int.\n\n";		
+		err();
+	}
+	if(ret1->eval._INT == 0 || ret2->eval._INT == 0) {
+		err_msg = "RUNTIME EXCEPTION: Arrays can't have row and column sizes less than 1.\n\n";		
+		err();
+	}
 	sev.var_val = alloc_mem_for_2arr(type, ret1->eval._INT, ret2->eval._INT);
 	entry = new_st_entry(_2ARRAY, strdup(var->ast_node_label), type, sev);
 	insert_st_entry(table, entry);
@@ -764,13 +918,22 @@ int init_var(st* table, ast var, ast init_exp) {
 	st_entry* entry;
 	returnable* ret;
 	entry = lookup_st_entry(table, var->ast_node_label);
-	//if(entry == NULL) goto ERROR;
+	if(entry == NULL) {
+		err_msg = "INTERNAL EXCEPTION: Grave problem with symbol table.\n\n";
+		err();
+	}
 	if(entry->symbol_entry_tag == _ARRAY) init_arr(entry, var, init_exp);
 	else if (entry->symbol_entry_tag == _2ARRAY) init_2arr(entry, var, init_exp);
 	else {
-		//if(init_exp->tag == INIT_LIST) goto ERROR;
+		if(init_exp->tag == INIT_LIST) {
+			err_msg = "RUNTIME EXCEPTION: Initializing value can't be a list.\n\n";
+			err();
+		}
 		ret = eval_exp(init_exp, RVAL);
-		//if(!is_compatible(entry->symbol_entry_type, ret->type)) goto ERROR;
+		if(!is_compatible(entry->symbol_entry_type, ret->type)) {
+			err_msg = "RUNTIME EXCEPTION: Incompatible type used for initialization.\n\n";			
+			err();
+		}
 		set_init_value(entry, 0, ret);
 	}
 	return 1;
@@ -782,20 +945,30 @@ int init_arr(st_entry* entry, ast var, ast init_list) {
 	ast offset;
 	returnable* ret;
 	returnable* ret1;
-	//if(init_list->tag != INIT_LIST) goto ERROR;
+	if(init_list->tag != INIT_LIST) {
+		err_msg = "RUNTIME EXCEPTION: Initializing value needs to be a list.\n\n";
+		err();
+	}
 	temp = get_left_most_child(init_list);
 	offset = get_left_most_child(var);
-	//if(offset == NULL) goto ERROR;
 	ret1 = eval_exp(offset, RVAL);
-	//if(!is_int_type(ret1->type)) goto ERROR;
 	for(i = 0; i < ret1->eval._INT && temp != NULL; i++) {
-		//if(temp->tag == INIT_LIST) goto ERROR;
+		if(temp->tag == INIT_LIST) {
+			err_msg = "RUNTIME EXCEPTION: Initializing value for individual array element can't be a list.\n\n";
+			err();
+		}
 		ret = eval_exp(temp, RVAL);
-		//if(!is_compatible(entry->symbol_entry_type, ret->type)) goto ERROR;
+		if(!is_compatible(entry->symbol_entry_type, ret->type)) {
+			err_msg = "RUNTIME EXCEPTION: Incompatible type used for initialization.\n\n";			
+			err();
+		}
 		set_init_value(entry, i, ret);
 		temp = get_left_most_sibling(temp);
 	}
-	//if(i < ret1->eval._INT || temp != NULL) goto ERROR;
+	if(i < ret1->eval._INT || temp != NULL) {
+		err_msg = "RUNTIME EXCEPTION: Invalid number of initialization values.\n\n";
+		err();
+	}
 	return 1;
 }
 
@@ -809,29 +982,44 @@ int init_2arr(st_entry* entry, ast var, ast init_init_list) {
 	returnable* ret;
 	returnable* ret1;
 	returnable* ret2;
-	//if(init_init_list->tag != INIT_LIST) goto ERROR;
+	if(init_init_list->tag != INIT_LIST) {
+		err_msg = "RUNTIME EXCEPTION: Initializing value needs to be a list.\n\n";
+		err();
+	}
 	offset1 = get_left_most_child(var);
-	//if(offset1 == NULL) goto ERROR;
 	offset2 = get_left_most_sibling(offset1);
-	//if(offset2 == NULL) goto ERROR;
 	ret1 = eval_exp(offset1, RVAL);
 	ret2 = eval_exp(offset2, RVAL);
-	//if(!is_int_type(ret1->type) || !is_int_type(ret2->type)) goto ERROR;
 	outer = get_left_most_child(init_init_list);
 	for(i = 0; i < ret1->eval._INT || outer != NULL; i++) {
-		//if(outer->tag != INIT_LIST) goto ERROR;
+		if(outer->tag != INIT_LIST) {
+			err_msg = "RUNTIME EXCEPTION: Initializing value for each row of a 2d array needs to be a list.\n\n";
+			err();
+		}
 		inner = get_left_most_child(outer);
 		for(j = 0; j < ret2->eval._INT && inner != NULL; j++) {
-			//if(inner->tag == INIT_LIST) goto ERROR;
+			if(inner->tag == INIT_LIST) {
+				err_msg = "RUNTIME EXCEPTION: Initializing value for individual elements of a 2d array can't be a list.\n\n";
+				err();
+			}
 			ret = eval_exp(inner, RVAL);
-			//if(!is_compatible(entry->symbol_entry_type, ret->type)) goto ERROR;
+			if(!is_compatible(entry->symbol_entry_type, ret->type)) {
+				err_msg = "RUNTIME EXCEPTION: Incompatible type used for initialization.\n\n";			
+				err();
+			}
 			set_2arr_init_value(entry, i, j, ret);
 			inner = get_left_most_sibling(inner);
+		}	
+		if(j < ret2->eval._INT || inner != NULL) {
+			err_msg = "RUNTIME EXCEPTION: Invalid number of initialization values.\n\n";
+			err();
 		}
-		//if(j < ret2->eval._INT || inner != NULL) goto ERROR;
 		outer = get_left_most_sibling(outer);
+	}	
+	if(i < ret1->eval._INT || outer != NULL) {
+		err_msg = "RUNTIME EXCEPTION: Invalid number of initialization values.\n\n";
+		err();
 	}
-	//if(i < ret1->eval._INT || outer != NULL) goto ERROR;
 	return 1;
 }
 

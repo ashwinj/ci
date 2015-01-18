@@ -32,20 +32,20 @@
 
 #define is_int_type(type) ((type >= CHAR) && (type <= LONG))
 
-#define is_basic_type ((type >= CHAR) && (type <= DOUBLE))
+#define is_basic_type(type) ((type >= CHAR) && (type <= DOUBLE))
 
 #define is_1pointer_type(type) ((type >= VOID_PTR) && (type <= DOUBLE_PTR))
 #define is_2pointer_type(type) ((type >= VOID_2PTR) && (type <= DOUBLE_2PTR))
 #define is_pointer_type(type) (is_1pointer_type(type) || is_2pointer_type(type))
 
 #define is_compatible(lval, rval) ((lval >= rval) || (is_int_type(lval) && is_int_type(rval)))
-#define is_lval_type(node) ((node->tag == VARIABLE) || ((node->tag == FUNCTION) && is_pointer_type(node->return_type) || \
+#define is_lval_type(node) ((node->tag == VARIABLE) || ((node->tag == FUNCTION) && is_pointer_type(node->return_type)) || \
 			    (node->tag == ARRAY) || (node->tag == ARRAY2) || (node->tag == DEREFERENCE))
 
 #define is_additive_types(ltype, rtype) ((is_pointer_type(ltype) && is_int_type(rtype)) || \
 					 (is_pointer_type(rtype) && is_int_type(ltype)))
 #define is_multiplicative_types(ltype, rtype) (is_basic_type(ltype) && is_basic_type(rtype))
-#define is_arithmetic_types(ltype, rtype) (is_additive_type(ltype, rtype) || is_multiplicative_type(ltype, rtype))
+#define is_arithmetic_types(ltype, rtype) (is_additive_types(ltype, rtype) || is_multiplicative_types(ltype, rtype))
 
 #define is_loop_env (CONTEXT_ENV == LOOP_ENV)
 #define is_break_condition (CONTEXT_ENV == (LOOP_ENV | BREAK_ENV))
@@ -101,5 +101,6 @@ returnable* copy_returnable(returnable* orig);
 void purge_returnable(returnable* ret);
 int is_lib_func(char* str);
 char get_char(char* str);
+int get_param_list_size(returnable* ret);
 
 #endif

@@ -26,6 +26,7 @@
 extern int _main_env_;
 extern int _interact_env_;
 extern int _block_stmt;
+extern char* err_msg;
 
 typedef enum {
 	UNDEFINED, VOID, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, CHAR_ARR, SHORT_ARR, INT_ARR,
@@ -81,5 +82,7 @@ int hash(char* message, int hash_size);
 int get_int(long val);
 char* concat_str(int num, ...);
 void* safe_malloc(size_t size);
+void purge_vmds();
+void err();
 
 #endif

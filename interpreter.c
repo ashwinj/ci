@@ -60,7 +60,7 @@ void* safe_malloc(size_t size) {
 	if(mem != NULL) {
 		return mem;
 	} else {
-		printf("MEMORY ERROR");
-		return NULL;
+		err_msg = "INTERNAL EXCEPTION: Memory allocation error. Maybe running low on memeory.\n\n";
+		err();
 	}
 }
