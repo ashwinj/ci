@@ -23,8 +23,10 @@ void purge_st_entry(st_entry* te) {
 }
 
 st* new_st(char* id) {
+	int i;
 	st* node = (st*)safe_malloc(sizeof(st));
 	node->symbol_table_id = strdup(id);
+	for(i = 0; i < SYMBOL_TABLE_HASH_SIZE; node->entry[i++] = NULL);
 	return node;
 }
 
@@ -39,11 +41,12 @@ void purge_st_entries(st* t) {
 	st_entry *temp, *cur;
 	for(i = 0; i < SYMBOL_TABLE_HASH_SIZE; i++) {
 		temp = t->entry[i];
-		while(temp!=NULL) {
+		while(temp != NULL) {
 			cur = temp;
 			temp = temp->next;
 			purge_st_entry(cur);
 		}
+		t->entry[i] = NULL;
 	}
 }
 

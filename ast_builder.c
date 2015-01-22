@@ -387,6 +387,7 @@ ast append_param_list_node(ast param_list, ast param_node) {
 }
 
 ast new_func_def_node(ast type, char *id, ast param_list, ast compound_stmt) {
+	ast temp;
 	ast param_num_node = new_constant_node(get_param_num(param_list), INT);
 	ast func_def_node = new_ast(FUNCTION, id, type->return_type);
 	if(param_list != NULL) {
@@ -396,7 +397,9 @@ ast new_func_def_node(ast type, char *id, ast param_list, ast compound_stmt) {
 		set_left_most_sibling(param_num_node, compound_stmt);
 	}
 	set_left_most_child(func_def_node, param_num_node);
-	purge_ast(type);
+	temp = type;
+	purge_ast(temp);
+	type = NULL;
 	return func_def_node;
 }
 

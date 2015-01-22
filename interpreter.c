@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "abstract_syntax_tree.h"
 #include "symbol_table.h"
 #include <stdarg.h>
 #include <stdlib.h>
@@ -10,7 +11,9 @@ int _main_env_, _interact_env_, _block_stmt;
 ar* activation_record_stack;
 
 void init(int isInteractiveSession) {
+	int i;
 	global_symbol_table = new_st(GLOBAL_SYMBOL_TABLE);
+	for(i = 0; i < MAX_NO_OF_FUNCTIONS; asts[i++] = NULL);
 	context_symbol_table = global_symbol_table;
 	activation_record_stack = NULL;
 	_main_env_ = FALSE;

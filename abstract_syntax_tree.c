@@ -82,9 +82,14 @@ ast lookup_ast(char* label) {
 
 void purge_asts() {
 	int i;
-	for(i = 0; i < MAX_NO_OF_FUNCTIONS; i++)
-		if(asts[i] != NULL)
-			purge_ast(asts[i]);
+	ast temp;
+	for(i = 0; i < MAX_NO_OF_FUNCTIONS; i++) {
+		temp = asts[i];
+		if(temp != NULL) {
+			purge_ast(temp);
+			asts[i] = NULL;
+		}
+	}
 }
 
 char* toString(ast_node_tag tag) {

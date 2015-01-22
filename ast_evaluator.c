@@ -783,8 +783,11 @@ int eval_stmt_list(ast node) {
 }
 
 int eval_global_var_decl(ast global_decl) {
+	ast temp;
 	eval_var_decl(global_symbol_table, global_decl);
-	purge_ast(global_decl);
+	temp = global_decl;
+	purge_ast(temp);
+	global_decl = NULL;
 	return 1;
 }
 
@@ -841,7 +844,7 @@ int decl_var(st* table, data_type type, ast var) {
 	else if(var->tag == ARRAY2) decl_2arr(table, type, var);
 	else {
 		sev.var_val = alloc_mem(type, 1);
-		entry = new_st_entry(_VARIABLE, strdup(var->ast_node_label), type, sev);
+		entry = new_st_entry(_VARIABLE, var->ast_node_label, type, sev);
 		insert_st_entry(table, entry);
 	}
 	return 1;
