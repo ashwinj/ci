@@ -533,7 +533,7 @@ returnable* get_assign_value(returnable* left, returnable* right) {
 	switch(left->type) {	
 	case CHAR_PTR:
 		*(left->eval._CHAR_PTR) = CHAR_VALUE(right);
-		ret->eval._SHORT = *(left->eval._SHORT_PTR);
+		ret->eval._CHAR = *(left->eval._CHAR_PTR);
 		return ret;		
 	case SHORT_PTR:
 		*(left->eval._SHORT_PTR) = SHORT_VALUE(right);
@@ -1274,23 +1274,28 @@ char* itostr(int i) {
 
 returnable* new_returnable() {
 	returnable* ret = (returnable*)safe_malloc(sizeof(returnable));
+	ret->next = NULL;
+	return ret;
 }
 
 returnable* copy_returnable(returnable* orig) {
 	returnable* dup = new_returnable();
 	dup->eval = orig->eval;
 	dup->type = orig->type;
+	dup->next = orig->next;
 	return dup;
 }
 
 void purge_returnable(returnable* ret) {
 	returnable* next;
-	if(ret == NULL) return;
-	while(ret != NULL) {
-		next = ret->next;
-		free(ret);
-		ret = next;
+	returnable* temp = ret;
+	if(temp == NULL) return;
+	while(temp != NULL) {
+		next = temp->next;
+		free(temp);
+		temp = next;
 	}
+	ret = NULL;
 }
 
 int is_lib_func(char* str) {
@@ -1302,7 +1307,7 @@ int is_lib_func(char* str) {
 char* get_unquoted_string(char* s) {
 	int i = 0, j = strlen(s)-1;
 	char* str = (char*)safe_malloc(sizeof(char)*j);
-	for(i =0; i < j-1; i++) str[i] = s[i+1];
+	for(i = 0; i < j-1; i++) str[i] = s[i+1];
 	str[j-1] = '\0';
 	return str;
 }

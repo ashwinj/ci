@@ -65,15 +65,15 @@ void is_hndlr(ast node);
 %%
 
 constant
-	: CHAR_CONSTANT				{ $$ = new_constant_node($1, CHAR); }
-	| HEX_INT_CONSTANT			{ $$ = new_constant_node($1, INT); }
-	| OCT_INT_CONSTANT			{ $$ = new_constant_node($1, INT); }
-	| DEC_INT_CONSTANT			{ $$ = new_constant_node($1, INT); }
-	| FLOAT_CONSTANT			{ $$ = new_constant_node($1, FLOAT); }
-	| DOUBLE_CONSTANT			{ $$ = new_constant_node($1, DOUBLE); }
-	| HEX_LONG_CONSTANT			{ $$ = new_constant_node($1, LONG); }
-	| OCT_LONG_CONSTANT			{ $$ = new_constant_node($1, LONG); }
-	| DEC_LONG_CONSTANT			{ $$ = new_constant_node($1, LONG); }
+	: CHAR_CONSTANT				{ $$ = new_constant_node($1, CHAR); free($1); }
+	| HEX_INT_CONSTANT			{ $$ = new_constant_node($1, INT); free($1); }
+	| OCT_INT_CONSTANT			{ $$ = new_constant_node($1, INT); free($1); }
+	| DEC_INT_CONSTANT			{ $$ = new_constant_node($1, INT); free($1); }
+	| FLOAT_CONSTANT			{ $$ = new_constant_node($1, FLOAT); free($1); }
+	| DOUBLE_CONSTANT			{ $$ = new_constant_node($1, DOUBLE); free($1); }
+	| HEX_LONG_CONSTANT			{ $$ = new_constant_node($1, LONG); free($1); }
+	| OCT_LONG_CONSTANT			{ $$ = new_constant_node($1, LONG); free($1); }
+	| DEC_LONG_CONSTANT			{ $$ = new_constant_node($1, LONG); free($1); }
 	;
 
 type
@@ -101,16 +101,16 @@ type
 	;
 
 primary_expression
-	: IDENTIFIER				{ $$ = new_variable_node($1, UNDEFINED); }
+	: IDENTIFIER				{ $$ = new_variable_node($1, UNDEFINED); free($1); }
 	| constant				{ $$ = $1; }
-	| STRING_LITERAL			{ $$ = new_constant_node($1, CHAR_PTR); }
+	| STRING_LITERAL			{ $$ = new_constant_node($1, CHAR_PTR); free($1); }
 	| '(' expression ')'			{ $$ = $2; }
 	;
 
 postfix_expression
 	: primary_expression							{ $$ = $1; }
-	| IDENTIFIER '[' expression ']'						{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); }
-	| IDENTIFIER '[' expression ']' '[' expression ']'			{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); }
+	| IDENTIFIER '[' expression ']'						{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); free($1); }
+	| IDENTIFIER '[' expression ']' '[' expression ']'			{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); free($1); }
 	| function_call								{ $$ = $1; }
 	| printf_call								{ $$ = $1; }	
 	| scanf_call								{ $$ = $1; }
@@ -240,7 +240,7 @@ initializer_list
 	;
 
 declarator
-	: IDENTIFIER								{ $$ = new_variable_node($1, UNDEFINED); }
+	: IDENTIFIER								{ $$ = new_variable_node($1, UNDEFINED); free($1); }
 	| IDENTIFIER '[' constant_expression ']'				{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); }
 	| IDENTIFIER '[' constant_expression ']' '[' constant_expression ']'	{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); }
 	;
@@ -260,21 +260,21 @@ variable_declaration
 	;
 
 variable_declaration_list
-	: variable_declaration							{ $$ = new_var_type_decl_list_node($1); }
-	| variable_declaration_list variable_declaration			{ $$ = append_var_type_decl_list_node($1, $2); }
+	: variable_declaration							{ if(main_interact_env) { $$ = NULL; } else { $$ = new_var_type_decl_list_node($1); } }
+	| variable_declaration_list variable_declaration			{ if(main_interact_env) { $$ = NULL; } else { $$ = append_var_type_decl_list_node($1, $2); } }
 	;
 
 statement
-	: compound_statement							{ $$ = $1; }
-	| expression_statement							{ $$ = $1; }
-	| selection_statement							{ $$ = $1; }
-	| iteration_statement							{ $$ = $1; }
-	| jump_statement							{ $$ = $1; }
+	: compound_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
+	| expression_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
+	| selection_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
+	| iteration_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
+	| jump_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
 	;
 
 statement_list
-	: statement								{ $$ = new_stmt_list_node($1); }
-	| statement_list statement						{ $$ = append_stmt_list_node($1, $2); }
+	: statement								{ if(main_interact_env) { $$ = NULL; } else { $$ = new_stmt_list_node($1); } }
+	| statement_list statement						{ if(main_interact_env) { $$ = NULL; } else { $$ = append_stmt_list_node($1, $2); } }
 	;
 
 expression_statement
@@ -306,17 +306,17 @@ iteration_statement
 	;
 
 jump_statement
-	: RETURN ';'							{ $$ = new_return_stmt_node(NULL); is_exec_return_stmt }
-	| RETURN expression ';'						{ $$ = new_return_stmt_node($2); is_exec_return_stmt }
+	: RETURN ';'							{ if(main_interact_env) { $$ = NULL; } else { $$ = new_return_stmt_node(NULL); } is_exec_return_stmt }
+	| RETURN expression ';'						{ if(main_interact_env) { $$ = NULL; purge_ast($2); } else { $$ = new_return_stmt_node($2); } is_exec_return_stmt }
 	| BREAK ';'							{ $$ = new_break_stmt_node(); }
 	| CONTINUE ';'							{ $$ = new_continue_stmt_node(); }
 	;
 
 compound_statement
-	: '{' '}'							{ $$ = new_compound_stmt_node(NULL, NULL); }
-	| '{' statement_list '}'					{ $$ = $2; }
-	| '{' variable_declaration_list '}'				{ $$ = $2; }
-	| '{' variable_declaration_list statement_list '}'		{ $$ = new_compound_stmt_node($2, $3); }
+	: '{' '}'							{ if(main_interact_env) { $$ = NULL; } else { $$ = new_compound_stmt_node(NULL, NULL); } }
+	| '{' statement_list '}'					{ if(main_interact_env) { $$ = NULL; } else { $$ = $2; } }
+	| '{' variable_declaration_list '}'				{ if(main_interact_env) { $$ = NULL; } else { $$ = $2; } }
+	| '{' variable_declaration_list statement_list '}'		{ if(main_interact_env) { $$ = NULL; } else { $$ = new_compound_stmt_node($2, $3); } }
 	;
 
 parameter_list
@@ -361,7 +361,7 @@ main_prototype
 	;
 
 main_definition
-	: main_prototype compound_statement				{ $$ = new_main_def_node($2); eval_main_def($$); is_exec_return_stmt }
+	: main_prototype compound_statement				{ if(!_interact_env_) {$$ = new_main_def_node($2); eval_main_def($$);} else { $$ = NULL; is_exec_return_stmt } }
 	;
 
 translation_unit
@@ -389,13 +389,15 @@ yyerror(char* s) {
 void is_eval_stmt(ast node) {
 	if(ctrl_stmt_exec_env) {
 		if(node->tag == IF_STATEMENT || node->tag == WHILE_STATEMENT || node->tag == FOR_STATEMENT) {
-			eval_stmt(node);
+			eval_stmt(node);			
+			purge_ast(node);	
 			print_prompt();
 		}
 	} else if(stmt_exec_env) {
 		if(node->tag == EXPRESSION_STATEMENT) eval_exp_stmt(node);
 		else if(node->tag == RETURN_STATEMENT) eval_return_stmt(node);
 		else if(node->tag == DECLARATION) eval_var_decl(CONTEXT_SYMBOL_TABLE, node);
+		purge_ast(node);
 		print_prompt();
 	}
 }
