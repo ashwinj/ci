@@ -1274,6 +1274,8 @@ char* itostr(int i) {
 
 returnable* new_returnable() {
 	returnable* ret = (returnable*)safe_malloc(sizeof(returnable));
+	ret->next = NULL;
+	return ret;
 }
 
 returnable* copy_returnable(returnable* orig) {
