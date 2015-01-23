@@ -1,11 +1,11 @@
-/*--------------------------------------------------------------------
-Name: Ashwin Jha
-Roll Number: CS-1328
-Date of Submission: 
-Deadline date: 
-Program description: ci interpreter prompt
-Acknowledgements: 
---------------------------------------------------------------------*/
+/****************************************************************************************************
+
+	VM functions declarations. For more information, check vm.c.
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _VM_H_
 #define _VM_H_
 

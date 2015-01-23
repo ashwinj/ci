@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	Declaration of interpreter scoper parameters and functions. For more information,
+	check interpreter.c.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _INTERPRETER_H_
 #define _INTERPRETER_H_
 
@@ -78,7 +88,14 @@ typedef struct returnable {
 } returnable;
 
 void init(int isInteractiveSession);
+value alloc_mem(data_type type, int units);
+value alloc_mem_for_2arr(data_type type, int rows, int cols);
+void purge_mem(data_type type, value val);
+returnable* new_returnable();
+returnable* copy_returnable(returnable* orig);
+void purge_returnable(returnable* ret);
 int hash(char* message, int hash_size);
+int ltoi(long val);
 int get_int(long val);
 char* concat_str(int num, ...);
 void* safe_malloc(size_t size);

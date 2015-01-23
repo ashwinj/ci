@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	AST builder functions declaration. For more information, check ast_builder.c.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _AST_BUILDER_H_
 #define _AST_BUILDER_H_
 

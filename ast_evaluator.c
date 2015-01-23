@@ -1,10 +1,16 @@
 /****************************************************************************************************
 
+	This module handles bulk of the ast evaluation code. A helper module ast_util.c is used
+	to hanlde specific data type operations and other utility tasks. There is a shortage of
+	inline comments in this project (we don't believes in commenting).
+
 	TODO AND FIXME list:
-		shady implementation of 2d arrays and pointers.
-		shady implementation of type.
-		handle type casting statement.
-		implement pre/post increment/decrement operations.
+		1. handle type casting statement.
+		2. implement pre/post increment/decrement operations.
+		
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
 
 *****************************************************************************************************/
 
@@ -69,6 +75,7 @@ returnable* eval_var_lval(ast var_node) {
 returnable* eval_arr_rval(ast arr_node) {
 	ast left_;
 	returnable* left;
+	returnable* ret;
 	st_entry* entry;
 	if(arr_node->tag != ARRAY) {
 		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
@@ -94,21 +101,26 @@ returnable* eval_arr_rval(ast arr_node) {
 	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_1pointer_type(entry->symbol_entry_type)) 
-			return get_rval_from_entry(entry, left->eval._INT, 1);
+			ret = get_rval_from_entry(entry, left->eval._INT, 1);
 		else if(is_2pointer_type(entry->symbol_entry_type)) 
-			return get_rval_from_entry(entry, left->eval._INT, 1);
+			ret = get_rval_from_entry(entry, left->eval._INT, 1);
 		else {
 			err_msg = "RUNTIME EXCEPTION: Basic type variables can't be used as array variables.\n\n";
 			err();
 		}
-	} else if(entry->symbol_entry_tag == _2ARRAY)
-		return get_2arr_lval_from_entry(entry, left->eval._INT, 0, 1);
-	return get_rval_from_entry(entry, left->eval._INT, 0);
+	} else if(entry->symbol_entry_tag == _2ARRAY) {
+		ret = get_2arr_lval_from_entry(entry, left->eval._INT, 0, 1);
+	} else {
+		ret = get_rval_from_entry(entry, left->eval._INT, 0);
+	}
+	purge_returnable(left);
+	return ret;
 }
 
 returnable* eval_arr_lval(ast arr_node) {
 	ast left_;
 	returnable* left;
+	returnable* ret;
 	st_entry* entry;
 	if(arr_node->tag != ARRAY) {
 		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
@@ -134,16 +146,20 @@ returnable* eval_arr_lval(ast arr_node) {
 	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_pointer_type(entry->symbol_entry_type)) 
-			return get_rval_from_entry(entry, left->eval._INT, 0);
+			ret = get_rval_from_entry(entry, left->eval._INT, 0);
 		else if(is_2pointer_type(entry->symbol_entry_type)) 
-			return get_rval_from_entry(entry, left->eval._INT, 0);
+			ret = get_rval_from_entry(entry, left->eval._INT, 0);
 		else {
 			err_msg = "RUNTIME EXCEPTION: Basic type variables can't be used as array variables.\n\n";
 			err();
 		}
-	} else if(entry->symbol_entry_tag == _2ARRAY)
-			return get_2arr_lval_from_entry(entry, left->eval._INT, 0, 0);
-	return get_lval_from_entry(entry, left->eval._INT, 0);
+	} else if(entry->symbol_entry_tag == _2ARRAY) {
+			ret = get_2arr_lval_from_entry(entry, left->eval._INT, 0, 0);
+	} else {
+		ret = get_lval_from_entry(entry, left->eval._INT, 0);
+	}
+	purge_returnable(left);
+	return ret;
 }
 
 returnable* eval_2arr_rval(ast arr_node) {
@@ -151,6 +167,7 @@ returnable* eval_2arr_rval(ast arr_node) {
 	ast right_;
 	returnable* left = NULL;
 	returnable* right = NULL;
+	returnable* ret;
 	st_entry* entry;
 	if(arr_node->tag != ARRAY2) {
 		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
@@ -182,13 +199,20 @@ returnable* eval_2arr_rval(ast arr_node) {
 	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_2pointer_type(entry->symbol_entry_type)) 
-			return get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
+			ret = get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
 		else {
 			err_msg = "RUNTIME EXCEPTION: Only double pointer type variables can be used as 2d array variables.\n\n";
 			err();
 		}
+	} else if(entry->symbol_entry_tag == _ARRAY) {
+		err_msg = "RUNTIME EXCEPTION: Only double pointer type variables can be used as 2d array variables.\n\n";
+		err();
+	} else {		
+		ret = get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
 	}
-	return get_2arr_rval_from_entry(entry, left->eval._INT, right->eval._INT, 0);
+	purge_returnable(left);
+	purge_returnable(right);
+	return ret;
 }
 
 returnable* eval_2arr_lval(ast arr_node) {
@@ -196,6 +220,7 @@ returnable* eval_2arr_lval(ast arr_node) {
 	ast right_;
 	returnable* left = NULL;
 	returnable* right = NULL;
+	returnable* ret;
 	st_entry* entry;
 	if(arr_node->tag != ARRAY2) {
 		err_msg = "INTERNAL EXCEPTION: ARRAY node expected.\n\n";
@@ -227,13 +252,20 @@ returnable* eval_2arr_lval(ast arr_node) {
 	}
 	if(entry->symbol_entry_tag == _VARIABLE) {
 		if(is_2pointer_type(entry->symbol_entry_type)) 
-			return get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
+			ret = get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
 		else {
 			err_msg = "RUNTIME EXCEPTION: Only double pointer type variables can be used as 2d array variables.\n\n";
 			err();
 		}
+	} else if(entry->symbol_entry_tag == _VARIABLE) {
+		err_msg = "RUNTIME EXCEPTION: Only double pointer type variables can be used as 2d array variables.\n\n";
+		err();
+	} else {		
+		ret =  get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
 	}
-	return get_2arr_lval_from_entry(entry, left->eval._INT, right->eval._INT, 1);
+	purge_returnable(left);
+	purge_returnable(right);
+	return ret;
 }
 
 returnable* eval_func_call(ast node) {
@@ -279,7 +311,9 @@ int exec_func(ast func_def, returnable* param_list) {
 	ast param;
 	st_entry* entry;
 	returnable* p = param_list;
-	int x = (eval_constant(get_left_most_child(func_def)))->eval._INT;
+	returnable* param_num = eval_constant(get_left_most_child(func_def));
+	int x = param_num->eval._INT;
+	purge_returnable(param_num);
 	if((!x && p != NULL) || (x && p == NULL) || (x && p != NULL && x != get_param_list_size(p))) {
 		err_msg = "RUNTIME EXCEPTION: Invalid number of parameters to function.\n\n";
 		err();
@@ -752,13 +786,14 @@ int eval_exp_stmt(ast node) {
 int eval_block_stmt(ast node) {
 	ast left_;
 	ast right_;
+	
 	left_ = get_left_most_child(node);
-	right_ = get_left_most_sibling(left_);
 	if(left_ != NULL) {
 		eval_context_var_decl_list(left_);
-	}
-	if(right_ != NULL) {
-		eval_stmt_list(right_);
+		right_ = get_left_most_sibling(left_);
+		if(right_ != NULL) {
+			eval_stmt_list(right_);
+		}
 	}
 	return 1;
 }
@@ -793,6 +828,7 @@ int eval_return_stmt(ast stmt) {
 		ret->eval._INT = 0;
 	}
 	CONTEXT_RETURN_VALUE = copy_returnable(ret);
+	purge_returnable(ret);
 	return 1;
 }
 
@@ -914,6 +950,7 @@ int decl_arr(st* table, data_type type, ast var) {
 	sev.var_val = alloc_mem(type, ret->eval._INT);
 	entry = new_st_entry(_ARRAY, var->ast_node_label, type, sev);
 	insert_st_entry(table, entry);
+	purge_returnable(ret);
 	return 1;
 }
 
@@ -952,6 +989,8 @@ int decl_2arr(st* table, data_type type, ast var) {
 	sev.var_val = alloc_mem_for_2arr(type, ret1->eval._INT, ret2->eval._INT);
 	entry = new_st_entry(_2ARRAY, var->ast_node_label, type, sev);
 	insert_st_entry(table, entry);
+	purge_returnable(ret1);
+	purge_returnable(ret2);
 	return 1;
 }
 

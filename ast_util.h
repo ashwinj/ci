@@ -1,3 +1,14 @@
+/****************************************************************************************************
+
+	AST evaluator helper functions and macors declaration. For more information, check
+	ast_util.c.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _AST_UTIL_H_
 #define _AST_UTIL_H_
 
@@ -60,8 +71,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-value alloc_mem(data_type type, int units);
-value alloc_mem_for_2arr(data_type type, int rows, int cols);
 data_type ptob(data_type type);
 data_type btop(data_type type);
 data_type get_effective_type(data_type left_type, data_type right_type);
@@ -95,10 +104,6 @@ returnable* lib_scanf(returnable* param_list);
 char* get_param_num(ast node);
 char* itostr(int i);
 char* get_unquoted_string(char* s);
-int is_lib_func(char* str);
-returnable* new_returnable();
-returnable* copy_returnable(returnable* orig);
-void purge_returnable(returnable* ret);
 int is_lib_func(char* str);
 char get_char(char* str);
 int get_param_list_size(returnable* ret);

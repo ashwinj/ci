@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	AST evaluator functions declaration. For more information, check ast_evaluator.c.
+		
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _AST_EVALUATOR_H_
 #define _AST_EVALUATOR_H_
 
