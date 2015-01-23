@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	This module handles error handling. Currently, this module is in its very basic
+	structure. This will be improved subsequently.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "abstract_syntax_tree.h"
@@ -6,13 +16,8 @@
 //err_t err_type;
 char* err_msg;
 
-void purge_vmds() {
-	clear_ar_stack();
-	purge_st(global_symbol_table);
-	purge_asts();
-}
-
 void err() {
+	purge_vmds();
 	fprintf(stderr, "\n%sBye bye!!\n\n", err_msg);
 	exit(1);
 }

@@ -1,3 +1,18 @@
+/****************************************************************************************************
+
+	This module handles bulk of the ast building code. These functions are used in the
+	parser (from the yacc file).
+
+	TODO AND FIXME list:
+		1. Nodes for script, translation-unit are not required. So, the corresponding
+		   functions can be removed.
+		
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #include "interpreter.h"
 #include "abstract_syntax_tree.h"
 #include "ast_builder.h"
@@ -400,8 +415,7 @@ ast new_continue_stmt_node() {
 }
 
 ast new_compound_stmt_node(ast var_type_decl_list_node,ast stmt_list_node) {
-	char* label = concat_str(3, "compound", "_", var_type_decl_list_node->ast_node_label, "_", stmt_list_node->ast_node_label);
-	ast compound_stmt_node = new_ast(BLOCK, label, UNDEFINED);
+	ast compound_stmt_node = new_ast(BLOCK, "compound", UNDEFINED);
 	if(var_type_decl_list_node != NULL) {
 		set_left_most_sibling(var_type_decl_list_node, stmt_list_node);
 		set_left_most_child(compound_stmt_node, var_type_decl_list_node);
@@ -409,7 +423,6 @@ ast new_compound_stmt_node(ast var_type_decl_list_node,ast stmt_list_node) {
 		if(stmt_list_node != NULL)
 			set_left_most_child(compound_stmt_node, stmt_list_node);
 	}
-	free(label);
 	return compound_stmt_node;
 }
 

@@ -1,3 +1,14 @@
+/****************************************************************************************************
+
+	Parser generator file. This file is influenced from the grammar rules given in
+	K&R book and various internet links.
+
+
+	@contributor		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor		Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 %{
 #include <stdio.h>
 #include "interpreter.h"
@@ -241,8 +252,8 @@ initializer_list
 
 declarator
 	: IDENTIFIER								{ $$ = new_variable_node($1, UNDEFINED); free($1); }
-	| IDENTIFIER '[' constant_expression ']'				{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); }
-	| IDENTIFIER '[' constant_expression ']' '[' constant_expression ']'	{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); }
+	| IDENTIFIER '[' constant_expression ']'				{ $$ = new_array_variable_node($1, $3, NULL, UNDEFINED); free($1); }
+	| IDENTIFIER '[' constant_expression ']' '[' constant_expression ']'	{ $$ = new_array_variable_node($1, $3, $6, UNDEFINED); free($1); }
 	;
 
 variable_declarator
@@ -260,21 +271,21 @@ variable_declaration
 	;
 
 variable_declaration_list
-	: variable_declaration							{ if(main_interact_env) { $$ = NULL; } else { $$ = new_var_type_decl_list_node($1); } }
-	| variable_declaration_list variable_declaration			{ if(main_interact_env) { $$ = NULL; } else { $$ = append_var_type_decl_list_node($1, $2); } }
+	: variable_declaration							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = new_var_type_decl_list_node($1); } }
+	| variable_declaration_list variable_declaration			{ if(stmt_exec_env) { $$ = NULL; } else { $$ = append_var_type_decl_list_node($1, $2); } }
 	;
 
 statement
-	: compound_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
-	| expression_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
-	| selection_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
-	| iteration_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
-	| jump_statement							{ if(main_interact_env) { $$ = NULL; } else { $$ = $1; } }
+	: compound_statement							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $1; } }
+	| expression_statement							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $1; } }
+	| selection_statement							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $1; } }
+	| iteration_statement							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $1; } }
+	| jump_statement							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $1; } }
 	;
 
 statement_list
-	: statement								{ if(main_interact_env) { $$ = NULL; } else { $$ = new_stmt_list_node($1); } }
-	| statement_list statement						{ if(main_interact_env) { $$ = NULL; } else { $$ = append_stmt_list_node($1, $2); } }
+	: statement								{ if(stmt_exec_env) { $$ = NULL; } else { $$ = new_stmt_list_node($1); } }
+	| statement_list statement						{ if(stmt_exec_env) { $$ = NULL; } else { $$ = append_stmt_list_node($1, $2); } }
 	;
 
 expression_statement
@@ -306,17 +317,17 @@ iteration_statement
 	;
 
 jump_statement
-	: RETURN ';'							{ if(main_interact_env) { $$ = NULL; } else { $$ = new_return_stmt_node(NULL); } is_exec_return_stmt }
-	| RETURN expression ';'						{ if(main_interact_env) { $$ = NULL; purge_ast($2); } else { $$ = new_return_stmt_node($2); } is_exec_return_stmt }
+	: RETURN ';'							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = new_return_stmt_node(NULL); } is_exec_return_stmt }
+	| RETURN expression ';'						{ if(stmt_exec_env) { $$ = NULL; purge_ast($2); } else { $$ = new_return_stmt_node($2); } is_exec_return_stmt }
 	| BREAK ';'							{ $$ = new_break_stmt_node(); }
 	| CONTINUE ';'							{ $$ = new_continue_stmt_node(); }
 	;
 
 compound_statement
-	: '{' '}'							{ if(main_interact_env) { $$ = NULL; } else { $$ = new_compound_stmt_node(NULL, NULL); } }
-	| '{' statement_list '}'					{ if(main_interact_env) { $$ = NULL; } else { $$ = $2; } }
-	| '{' variable_declaration_list '}'				{ if(main_interact_env) { $$ = NULL; } else { $$ = $2; } }
-	| '{' variable_declaration_list statement_list '}'		{ if(main_interact_env) { $$ = NULL; } else { $$ = new_compound_stmt_node($2, $3); } }
+	: '{' '}'							{ if(stmt_exec_env) { $$ = NULL; } else { $$ = new_compound_stmt_node(NULL, NULL); } }
+	| '{' statement_list '}'					{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $2; } }
+	| '{' variable_declaration_list '}'				{ if(stmt_exec_env) { $$ = NULL; } else { $$ = $2; } }
+	| '{' variable_declaration_list statement_list '}'		{ if(stmt_exec_env) { $$ = NULL; } else { $$ = new_compound_stmt_node($2, $3); } }
 	;
 
 parameter_list
@@ -326,15 +337,15 @@ parameter_list
 	;
 
 parameter
-	: type IDENTIFIER						{ $$ = new_param_node($1, $2); }
+	: type IDENTIFIER						{ $$ = new_param_node($1, $2); free($2); }
 	;
 
 function_definition
-	: type IDENTIFIER '(' parameter_list ')' compound_statement	{ $$ = new_func_def_node($1,$2,$4,$6); }
+	: type IDENTIFIER '(' parameter_list ')' compound_statement	{ $$ = new_func_def_node($1,$2,$4,$6); free($2); }
 	;
 
 function_call
-	: IDENTIFIER '(' argument_expression_list ')'			{ $$ = new_func_call_node($1,$3); }
+	: IDENTIFIER '(' argument_expression_list ')'			{ $$ = new_func_call_node($1,$3); free($1); }
 	;
 
 printf_call

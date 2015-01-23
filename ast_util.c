@@ -1,3 +1,21 @@
+/****************************************************************************************************
+
+	This is a helper module for ast_evaluator.c. It handles the type specific tasks and
+	other utility tasks. in general this file requires a lot of changes. we were in a
+	hurry to complete our project and so we gave preference to correct and stable 
+	implementation over aesthetics.
+
+	TODO AND FIXME list:
+		1. a common function (with value as the common link maybe) for all conversion
+		   functions.
+		2. comments...lots of them...definitely. ;)
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #include "interpreter.h"
 #include "abstract_syntax_tree.h"
 #include "ast_util.h"
@@ -5,105 +23,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-value alloc_mem(data_type type, int units) {
-	value val;
-	switch(type) {
-	case CHAR:
-		val._CHAR_PTR = (char*)safe_malloc(sizeof(char)*units);
-		return val;
-	case SHORT:
-		val._SHORT_PTR = (short*)safe_malloc(sizeof(short)*units);
-		return val;
-	case INT:
-		val._INT_PTR = (int*)safe_malloc(sizeof(int)*units);
-		return val;
-	case LONG:
-		val._LONG_PTR = (long*)safe_malloc(sizeof(long)*units);
-		return val;
-	case FLOAT:
-		val._FLOAT_PTR = (float*)safe_malloc(sizeof(float)*units);
-		return val;
-	case DOUBLE:
-		val._DOUBLE_PTR = (double*)safe_malloc(sizeof(double)*units);
-		return val;
-	case CHAR_PTR:
-		val._CHAR_2PTR = (char**)safe_malloc(sizeof(char*)*units);
-		return val;
-	case SHORT_PTR:
-		val._SHORT_2PTR = (short**)safe_malloc(sizeof(short*)*units);
-		return val;
-	case INT_PTR:
-		val._INT_2PTR = (int**)safe_malloc(sizeof(int*)*units);
-		return val;
-	case LONG_PTR:
-		val._LONG_2PTR = (long**)safe_malloc(sizeof(long*)*units);
-		return val;
-	case FLOAT_PTR:
-		val._FLOAT_2PTR = (float**)safe_malloc(sizeof(float*)*units);
-		return val;
-	case DOUBLE_PTR:
-		val._DOUBLE_2PTR = (double**)safe_malloc(sizeof(double*)*units);
-		return val;
-	case CHAR_2PTR:
-		val._CHAR_3PTR = (char***)safe_malloc(sizeof(char**)*units);
-		return val;
-	case SHORT_2PTR:
-		val._SHORT_3PTR = (short***)safe_malloc(sizeof(short**)*units);
-		return val;
-	case INT_2PTR:
-		val._INT_3PTR = (int***)safe_malloc(sizeof(int**)*units);
-		return val;
-	case LONG_2PTR:
-		val._LONG_3PTR = (long***)safe_malloc(sizeof(long**)*units);
-		return val;
-	case FLOAT_2PTR:
-		val._FLOAT_3PTR = (float***)safe_malloc(sizeof(float**)*units);
-		return val;
-	case DOUBLE_2PTR:
-		val._DOUBLE_3PTR = (double***)safe_malloc(sizeof(double**)*units);
-		return val;
-	}
-}
-
-value alloc_mem_for_2arr(data_type type, int rows, int cols) {
-	int i;
-	value val;
-	switch(type) {
-	case CHAR:
-		val._CHAR_2PTR = (char**)safe_malloc(sizeof(char*)*rows);
-		for(i = 0; i < rows; i++) 
-			*(val._CHAR_2PTR + i) = (char*)safe_malloc(sizeof(char)*cols);
-		return val;
-	case SHORT:
-		val._SHORT_2PTR = (short**)safe_malloc(sizeof(short*)*rows);
-		for(i = 0; i < rows; i++) 
-			*(val._SHORT_2PTR + i) = (short*)safe_malloc(sizeof(short)*cols);
-		return val;
-	case INT:
-		val._INT_2PTR = (int**)safe_malloc(sizeof(int*)*rows);
-		for(i = 0; i < rows; i++) 
-			*(val._INT_2PTR + i) = (int*)safe_malloc(sizeof(int)*cols);
-		return val;
-	case LONG:
-		val._LONG_2PTR = (long**)safe_malloc(sizeof(long*)*rows);
-		for(i = 0; i < rows; i++) 
-			*(val._LONG_2PTR + i) = (long*)safe_malloc(sizeof(long)*cols);
-		return val;
-	case FLOAT:
-		val._FLOAT_2PTR = (float**)safe_malloc(sizeof(float*)*rows);
-		for(i = 0; i < rows; i++) 
-			*(val._FLOAT_2PTR + i) = (float*)safe_malloc(sizeof(float)*cols);
-		return val;
-	case DOUBLE:
-		val._DOUBLE_2PTR = (double**)safe_malloc(sizeof(double*)*rows);
-		for(i = 0; i < rows; i++) 
-			*(val._DOUBLE_2PTR + i) = (double*)safe_malloc(sizeof(double)*cols);
-		return val;
-	default:
-		err();
-	}
-}
 
 data_type ptob(data_type type) {
 	switch(type) {
@@ -1156,6 +1075,7 @@ returnable* lib_printf(returnable* param_list) {
 			i += 1;
 		}
 	}
+	free(str);
 	ret = new_returnable();
 	ret->type = INT;
 	ret->eval._INT = count;
@@ -1246,6 +1166,7 @@ returnable* lib_scanf(returnable* param_list) {
 			if(param != NULL) param = param->next;
 		}
 	}
+	free(str);
 	ret = new_returnable();
 	ret->type = INT;
 	ret->eval._INT = count;
@@ -1270,32 +1191,6 @@ char* itostr(int i) {
 	char* str = (char*)safe_malloc(2*sizeof(int));
 	sprintf(str, "%d", i);
 	return str;
-}
-
-returnable* new_returnable() {
-	returnable* ret = (returnable*)safe_malloc(sizeof(returnable));
-	ret->next = NULL;
-	return ret;
-}
-
-returnable* copy_returnable(returnable* orig) {
-	returnable* dup = new_returnable();
-	dup->eval = orig->eval;
-	dup->type = orig->type;
-	dup->next = orig->next;
-	return dup;
-}
-
-void purge_returnable(returnable* ret) {
-	returnable* next;
-	returnable* temp = ret;
-	if(temp == NULL) return;
-	while(temp != NULL) {
-		next = temp->next;
-		free(temp);
-		temp = next;
-	}
-	ret = NULL;
 }
 
 int is_lib_func(char* str) {

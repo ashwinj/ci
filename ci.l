@@ -1,3 +1,14 @@
+/****************************************************************************************************
+
+	Lexer generator file. This file is influenced from the grammar rules given in
+	K&R book and various internet links.
+
+
+	@contributor		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor		Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 D			[0-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]
@@ -126,7 +137,7 @@ static void comment(void)
             if (c == 0)
                 break;
         }
-    yyerror("unterminated comment");
+    yyerror("Unterminated comment");
 }
 
 

@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	This module handles the functions related to manipulation of abstract syntax tree
+	data structure. For more information on ast data structure check abstract_syntax_tree.h. 
+		
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #include "interpreter.h"
 #include "abstract_syntax_tree.h"
 #include <stdlib.h>

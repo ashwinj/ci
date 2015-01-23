@@ -1,3 +1,21 @@
+/****************************************************************************************************
+
+	Virtual machine for ci. It manages all the modules of the interpreter to
+	parse-->build ast-->evaluate ast.
+	For more information on specific modules, check following:
+		1. Lexer + Parser	ci.l, ci.y
+		2. AST builder		ast_builder.h
+		3. AST evaluation	ast_evaluator.h
+	For data structures:
+		1. Abstract syntax tree		abstract_syntax_tree.h	
+		1. Symbol table			symbol_table.h
+		2. Activation record		symbol_table.h
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #include<stdio.h>
 #include<stdlib.h>
 #include "vm.h"
@@ -63,11 +81,15 @@ int _start_() {
 int _interpret_(FILE* in) {
 	/* go on interpreting */
 	int i = -1;
+	returnable* ret;
 	init(FALSE);
 	yyin=in;
 	yyparse();
-	i =  eval_func_call(_main_ref_)->eval._INT;
+	ret = eval_func_call(_main_ref_);
+	i =  ret->eval._INT;
+	purge_returnable(ret);
 	purge_vmds();
+	purge_ast(_main_ref_);
 	_main_ref_ = NULL;
 	return i;
 }

@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	This module handles the functions related to manipulation of symbol table and activation
+	record data structure.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #include "interpreter.h"
 #include "symbol_table.h"
 #include <stdlib.h>
@@ -19,68 +29,8 @@ st_entry* new_st_entry(symbol_token_tag stt, char* l, data_type set, symbol_valu
 
 void purge_st_entry(st_entry* te) {
 	free(te->symbol_entry_label);
-	if(te->symbol_entry_tag != _FUNCTION) purge_sev(te->symbol_entry_type, te->symbol_entry_value.var_val);
+	if(te->symbol_entry_tag != _FUNCTION) purge_mem(te->symbol_entry_type, te->symbol_entry_value.var_val);
 	free(te);
-}
-
-
-void purge_sev(data_type type, value val) {
-	switch(type) {
-	case CHAR:
-		free(val._CHAR_PTR);
-		return;
-	case SHORT:
-		free(val._SHORT_PTR);
-		return;
-	case INT:
-		free(val._INT_PTR);
-		return;
-	case LONG:
-		free(val._LONG_PTR);
-		return;
-	case FLOAT:
-		free(val._FLOAT_PTR);
-		return;
-	case DOUBLE:
-		free(val._DOUBLE_PTR);
-		return;
-	case CHAR_PTR:
-		free(val._CHAR_2PTR);
-		return;
-	case SHORT_PTR:
-		free(val._SHORT_2PTR);
-		return;
-	case INT_PTR:
-		free(val._INT_2PTR);
-		return;
-	case LONG_PTR:
-		free(val._LONG_2PTR);
-		return;
-	case FLOAT_PTR:
-		free(val._FLOAT_2PTR);
-		return;
-	case DOUBLE_PTR:
-		free(val._DOUBLE_2PTR);
-		return;
-	case CHAR_2PTR:
-		free(val._CHAR_3PTR);
-		return;
-	case SHORT_2PTR:
-		free(val._SHORT_3PTR);
-		return;
-	case INT_2PTR:
-		free(val._INT_3PTR);
-		return;
-	case LONG_2PTR:
-		free(val._LONG_3PTR);
-		return;
-	case FLOAT_2PTR:
-		free(val._FLOAT_3PTR);
-		return;
-	case DOUBLE_2PTR:
-		free(val._DOUBLE_3PTR);
-		return;
-	}
 }
 
 st* new_st(char* id) {
@@ -145,6 +95,7 @@ ar* new_ar(char* block_id) {
 
 void purge_ar(ar* a) {
 	purge_st(a->table);
+	purge_returnable(a->return_value);
 	free(a);
 }
 
