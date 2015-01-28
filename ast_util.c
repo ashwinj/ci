@@ -628,32 +628,36 @@ void set_2arr_init_value(st_entry* entry, int row, int col, returnable* _init_) 
 }
 
 returnable* get_arithmetic_value(returnable* left, returnable* right, ast_node_tag op) {
-	returnable* ret = new_returnable();
-	ret->type = get_effective_type(left->type, right->type);
 	void* l;
 	int i;
+	returnable* ret = new_returnable();
+	if(op == UNARY_MINUS) {
+		ret->type = left->type;
+	} else {
+		ret->type = get_effective_type(left->type, right->type);
+	}
 	if(op == SUBTRACTION && is_pointer_type(ret->type) && ret->type == right->type) {
 		err_msg = "RUNTIME EXCEPTION: Invalid opeartion over pointer.\n\n";
 		err();
 	}
 	switch(ret->type) {
 	case CHAR:
-		ret->eval._CHAR = char_arithmetic_value(CHAR_VALUE(left), CHAR_VALUE(right), op);
+		ret->eval._CHAR = char_arithmetic_value(CHAR_VALUE(left), right!=NULL?CHAR_VALUE(right):0, op);
 		return ret;
 	case SHORT:
-		ret->eval._SHORT = short_arithmetic_value(SHORT_VALUE(left), SHORT_VALUE(right), op);
+		ret->eval._SHORT = short_arithmetic_value(SHORT_VALUE(left), right!=NULL?SHORT_VALUE(right):0, op);
 		return ret;
 	case INT:
-		ret->eval._INT = int_arithmetic_value(INT_VALUE(left), INT_VALUE(right), op);
+		ret->eval._INT = int_arithmetic_value(INT_VALUE(left), right!=NULL?INT_VALUE(right):0, op);
 		return ret;
 	case LONG:
-		ret->eval._LONG = long_arithmetic_value(LONG_VALUE(left), LONG_VALUE(right), op);
+		ret->eval._LONG = long_arithmetic_value(LONG_VALUE(left), right!=NULL?LONG_VALUE(right):0, op);
 		return ret;
 	case FLOAT:
-		ret->eval._FLOAT = float_arithmetic_value(FLOAT_VALUE(left), FLOAT_VALUE(right), op);
+		ret->eval._FLOAT = float_arithmetic_value(FLOAT_VALUE(left), right!=NULL?FLOAT_VALUE(right):0, op);
 		return ret;
 	case DOUBLE:
-		ret->eval._DOUBLE = double_arithmetic_value(DOUBLE_VALUE(left), DOUBLE_VALUE(right), op);
+		ret->eval._DOUBLE = double_arithmetic_value(DOUBLE_VALUE(left), right!=NULL?DOUBLE_VALUE(right):0, op);
 		return ret;
 	case CHAR_PTR:
 		ret->eval._CHAR_PTR = (char*)ptr_arithmetic_value((is_pointer_type(left->type) ? VOID_PTR_VALUE(left) : VOID_PTR_VALUE(right)),

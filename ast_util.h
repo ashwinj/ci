@@ -42,14 +42,18 @@
 #define DOUBLE_2PTR_VALUE(x) (x->type == DOUBLE_2PTR ? x->eval._DOUBLE_2PTR : (double**)FLOAT_2PTR_VALUE(x))
 
 #define is_int_type(type) ((type >= CHAR) && (type <= LONG))
-
-#define is_basic_type(type) ((type >= CHAR) && (type <= DOUBLE))
+#define is_real_type(type) ((type == FLOAT) || (type == DOUBLE))
+#define is_basic_type(type) (is_int_type(type) || is_real_type(type))
 
 #define is_1pointer_type(type) ((type >= VOID_PTR) && (type <= DOUBLE_PTR))
 #define is_2pointer_type(type) ((type >= VOID_2PTR) && (type <= DOUBLE_2PTR))
 #define is_pointer_type(type) (is_1pointer_type(type) || is_2pointer_type(type))
 
-#define is_compatible(lval, rval) ((lval >= rval) || (is_int_type(lval) && is_int_type(rval)))
+#define is_compatible(lval, rval) ((is_basic_type(lval) && is_basic_type(rval)) || \
+				   (is_pointer_type(lval) && is_pointer_type(rval)) || \
+				   (is_pointer_type(lval) && is_int_type(rval)) || \
+				   (is_int_type(lval) && is_pointer_type(rval)))
+
 #define is_lval_type(node) ((node->tag == VARIABLE) || ((node->tag == FUNCTION) && is_pointer_type(node->return_type)) || \
 			    (node->tag == ARRAY) || (node->tag == ARRAY2) || (node->tag == DEREFERENCE))
 
