@@ -37,8 +37,8 @@ ast _main_ref_;
 
 void publish_masthead() {
 	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n\t"
-			"@author  Ashwin Jha <ajha.dev@gmail.com>\n\t"
-			"@author  Durgesh Singh <blah@blah.blah>\n\n");
+			"@author  	Ashwin Jha<ajha.dev@gmail.com>\n\t"
+			"@contributor  	Durgesh Singh<durgesh.ccet@gmail.com>\n\n");
 }
 
 void show_help() {
