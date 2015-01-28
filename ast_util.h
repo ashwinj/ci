@@ -1,3 +1,14 @@
+/****************************************************************************************************
+
+	AST evaluator helper functions and macors declaration. For more information, check
+	ast_util.c.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _AST_UTIL_H_
 #define _AST_UTIL_H_
 
@@ -31,14 +42,18 @@
 #define DOUBLE_2PTR_VALUE(x) (x->type == DOUBLE_2PTR ? x->eval._DOUBLE_2PTR : (double**)FLOAT_2PTR_VALUE(x))
 
 #define is_int_type(type) ((type >= CHAR) && (type <= LONG))
-
-#define is_basic_type(type) ((type >= CHAR) && (type <= DOUBLE))
+#define is_real_type(type) ((type == FLOAT) || (type == DOUBLE))
+#define is_basic_type(type) (is_int_type(type) || is_real_type(type))
 
 #define is_1pointer_type(type) ((type >= VOID_PTR) && (type <= DOUBLE_PTR))
 #define is_2pointer_type(type) ((type >= VOID_2PTR) && (type <= DOUBLE_2PTR))
 #define is_pointer_type(type) (is_1pointer_type(type) || is_2pointer_type(type))
 
-#define is_compatible(lval, rval) ((lval >= rval) || (is_int_type(lval) && is_int_type(rval)))
+#define is_compatible(lval, rval) ((is_basic_type(lval) && is_basic_type(rval)) || \
+				   (is_pointer_type(lval) && is_pointer_type(rval)) || \
+				   (is_pointer_type(lval) && is_int_type(rval)) || \
+				   (is_int_type(lval) && is_pointer_type(rval)))
+
 #define is_lval_type(node) ((node->tag == VARIABLE) || ((node->tag == FUNCTION) && is_pointer_type(node->return_type)) || \
 			    (node->tag == ARRAY) || (node->tag == ARRAY2) || (node->tag == DEREFERENCE))
 
@@ -60,8 +75,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-value alloc_mem(data_type type, int units);
-value alloc_mem_for_2arr(data_type type, int rows, int cols);
 data_type ptob(data_type type);
 data_type btop(data_type type);
 data_type get_effective_type(data_type left_type, data_type right_type);
@@ -95,10 +108,6 @@ returnable* lib_scanf(returnable* param_list);
 char* get_param_num(ast node);
 char* itostr(int i);
 char* get_unquoted_string(char* s);
-int is_lib_func(char* str);
-returnable* new_returnable();
-returnable* copy_returnable(returnable* orig);
-void purge_returnable(returnable* ret);
 int is_lib_func(char* str);
 char get_char(char* str);
 int get_param_list_size(returnable* ret);

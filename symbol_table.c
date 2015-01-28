@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	This module handles the functions related to manipulation of symbol table and activation
+	record data structure.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #include "interpreter.h"
 #include "symbol_table.h"
 #include <stdlib.h>
@@ -19,12 +29,15 @@ st_entry* new_st_entry(symbol_token_tag stt, char* l, data_type set, symbol_valu
 
 void purge_st_entry(st_entry* te) {
 	free(te->symbol_entry_label);
+	if(te->symbol_entry_tag != _FUNCTION) purge_mem(te->symbol_entry_type, te->symbol_entry_value.var_val);
 	free(te);
 }
 
 st* new_st(char* id) {
+	int i;
 	st* node = (st*)safe_malloc(sizeof(st));
 	node->symbol_table_id = strdup(id);
+	for(i = 0; i < SYMBOL_TABLE_HASH_SIZE; node->entry[i++] = NULL);
 	return node;
 }
 
@@ -39,11 +52,12 @@ void purge_st_entries(st* t) {
 	st_entry *temp, *cur;
 	for(i = 0; i < SYMBOL_TABLE_HASH_SIZE; i++) {
 		temp = t->entry[i];
-		while(temp!=NULL) {
+		while(temp != NULL) {
 			cur = temp;
 			temp = temp->next;
 			purge_st_entry(cur);
 		}
+		t->entry[i] = NULL;
 	}
 }
 
@@ -81,6 +95,7 @@ ar* new_ar(char* block_id) {
 
 void purge_ar(ar* a) {
 	purge_st(a->table);
+	purge_returnable(a->return_value);
 	free(a);
 }
 

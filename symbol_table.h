@@ -1,3 +1,13 @@
+/****************************************************************************************************
+
+	Symbol table and activation record data structures. For more information, check 
+	symbol_table.c.
+
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _SYMBOL_TABLE_H_
 #define _SYMBOL_TABLE_H_
 
@@ -58,5 +68,6 @@ void purge_ar(ar* a);
 void push_ar(ar* a);
 ar* pop_ar();
 ar* peek_ar();
+void clear_ar_stack();
 
 #endif

@@ -1,3 +1,18 @@
+/****************************************************************************************************
+
+	This module handles bulk of the ast building code. These functions are used in the
+	parser (from the yacc file).
+
+	TODO AND FIXME list:
+		1. Nodes for script, translation-unit are not required. So, the corresponding
+		   functions can be removed.
+		
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+	@contributor	Durgesh Singh<durgesh.ccet@gmail.com>
+
+*****************************************************************************************************/
+
 #include "interpreter.h"
 #include "abstract_syntax_tree.h"
 #include "ast_builder.h"
@@ -69,99 +84,128 @@ ast new_unary_exp_node(char op, ast exp) {
 }
 
 ast new_ref_exp_node(ast exp) {
-	ast ref_node = new_ast(REFERENCE, concat_str(2, "ref_", exp->ast_node_label), UNDEFINED);
+	char* label = concat_str(2, "ref_", exp->ast_node_label);
+	ast ref_node = new_ast(REFERENCE, label, UNDEFINED);
 	set_left_most_child(ref_node, exp);
+	free(label);
 	return ref_node;
 }
 
 ast new_deref_exp_node(ast exp) {
-	ast deref_node = new_ast(DEREFERENCE, concat_str(2, "deref_", exp->ast_node_label), UNDEFINED);
+	char* label = concat_str(2, "deref_", exp->ast_node_label);
+	ast deref_node = new_ast(DEREFERENCE, label, UNDEFINED);
 	set_left_most_child(deref_node, exp);
+	free(label);
 	return deref_node;
 }
 
 ast new_unary_plus_exp_node(ast exp) {
-	ast unary_plus_node = new_ast(UNARY_PLUS, concat_str(2, "uplus_", exp->ast_node_label), UNDEFINED);
+	char* label = concat_str(2, "uplus_", exp->ast_node_label);
+	ast unary_plus_node = new_ast(UNARY_PLUS, label, UNDEFINED);
 	set_left_most_child(unary_plus_node, exp);
+	free(label);
 	return unary_plus_node;
 }
 
 ast new_unary_minus_exp_node(ast exp) {
-	ast unary_minus_node = new_ast(UNARY_MINUS, concat_str(2, "uminus_", exp->ast_node_label), UNDEFINED);
+	char* label = concat_str(2, "uminus_", exp->ast_node_label);
+	ast unary_minus_node = new_ast(UNARY_MINUS, label, UNDEFINED);
 	set_left_most_child(unary_minus_node, exp);
+	free(label);
 	return unary_minus_node;
 }
 
 ast new_complement_exp_node(ast exp) {
-	ast complement_node = new_ast(BITWISE_NOT, concat_str(2, "~_", exp->ast_node_label), UNDEFINED);
+	char* label = concat_str(2, "~_", exp->ast_node_label);
+	ast complement_node = new_ast(BITWISE_NOT, label, UNDEFINED);
 	set_left_most_child(complement_node, exp);
+	free(label);
 	return complement_node;
 }
 
 ast new_not_exp_node(ast exp) {
-	ast not_node = new_ast(LOGICAL_NOT, concat_str(2, "!_", exp->ast_node_label), UNDEFINED);
+	char* label = concat_str(2, "!_", exp->ast_node_label);
+	ast not_node = new_ast(LOGICAL_NOT, label, UNDEFINED);
 	set_left_most_child(not_node, exp);
+	free(label);
 	return not_node;
 }
 
 ast new_cast_node(ast type, ast expression) {
-	ast cast_node = new_ast(TYPE_CAST, concat_str(4,"tp_",type->ast_node_label,"_on_",expression->ast_node_label), type->return_type);
+	char* label = concat_str(4,"tp_",type->ast_node_label,"_on_",expression->ast_node_label);
+	ast cast_node = new_ast(TYPE_CAST, label, type->return_type);
 	set_left_most_sibling(type, expression);
 	set_left_most_child(cast_node, type);
+	free(label);
 	return cast_node;
 }
 
 ast new_mul_exp_node(ast left, ast_node_tag t, ast right) {
-	ast mul_exp_node = new_ast(t, concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label), UNDEFINED);
+	char* label = concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label);
+	ast mul_exp_node = new_ast(t, label, UNDEFINED);
 	set_left_most_sibling(left, right);
 	set_left_most_child(mul_exp_node, left);
+	free(label);
 	return mul_exp_node;
 }
 
 ast new_add_exp_node(ast left, ast_node_tag t, ast right) {
-	ast add_exp_node = new_ast(t, concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label), UNDEFINED);
+	char* label = concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label);
+	ast add_exp_node = new_ast(t, label, UNDEFINED);
 	set_left_most_sibling(left, right);
 	set_left_most_child(add_exp_node, left);
+	free(label);
 	return add_exp_node;
 }
 
 ast new_shift_exp_node(ast left, ast_node_tag t, ast right) {
-	ast shift_exp_node = new_ast(t, concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label), left->return_type);
+	char* label = concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label);
+	ast shift_exp_node = new_ast(t, label, left->return_type);
 	set_left_most_sibling(left, right);
 	set_left_most_child(shift_exp_node, left);
+	free(label);
 	return shift_exp_node;
 }
 
 ast new_rel_exp_node(ast left, ast_node_tag t, ast right) {
-	ast rel_exp_node = new_ast(t, concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label), INT);
+	char* label = concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label);
+	ast rel_exp_node = new_ast(t, label, INT);
 	set_left_most_sibling(left, right);
 	set_left_most_child(rel_exp_node, left);
+	free(label);
 	return rel_exp_node;
 }
 
 ast new_logic_exp_node(ast left, ast_node_tag t, ast right) {
-	ast logic_exp_node = new_ast(t, concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label), INT);
+	char* label = concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label);
+	ast logic_exp_node = new_ast(t, label, INT);
 	set_left_most_sibling(left, right);
 	set_left_most_child(logic_exp_node, left);
+	free(label);
 	return logic_exp_node;
 }
 
 ast new_bit_exp_node(ast left, ast_node_tag t, ast right) {
-	ast bit_exp_node = new_ast(t, concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label), UNDEFINED);
+	char* label = concat_str(5, left->ast_node_label, "_", toString(t), "_", right->ast_node_label);
+	ast bit_exp_node = new_ast(t, label, UNDEFINED);
 	set_left_most_sibling(left, right);
 	set_left_most_child(bit_exp_node, left);
+	free(label);
 	return bit_exp_node;
 }
 
 ast new_cond_exp_node(ast condition, ast true_case, ast false_case) {
-	ast cond_exp_node = new_ast(CONDITIONAL, concat_str(5, condition->ast_node_label, "?", true_case->ast_node_label, ":", false_case->ast_node_label), UNDEFINED);
+	char* label = concat_str(5, condition->ast_node_label, "?", true_case->ast_node_label, ":", false_case->ast_node_label);
+	ast cond_exp_node = new_ast(CONDITIONAL, label, UNDEFINED);
 	set_left_most_sibling(true_case, false_case);
 	set_left_most_sibling(condition, true_case);
 	set_left_most_child(cond_exp_node, condition);
+	free(label);
 	return cond_exp_node;
 }
 
 ast new_assign_exp_node(ast lval, assignment_code code, ast rval) {
+	char* label;
 	ast assign_exp_node;
 	ast temp_op_node;
 	ast temp_exp_node;
@@ -230,9 +274,11 @@ ast new_assign_exp_node(ast lval, assignment_code code, ast rval) {
 		set_left_most_child(temp_op_node, temp_exp_node);
 		break;
 	}
-	assign_exp_node = new_ast(ASSIGNMENT, concat_str(3, lval->ast_node_label, "=", temp_op_node->ast_node_label), UNDEFINED);
+	label = concat_str(3, lval->ast_node_label, "=", temp_op_node->ast_node_label);
+	assign_exp_node = new_ast(ASSIGNMENT, label, UNDEFINED);
 	set_left_most_sibling(lval, temp_op_node);
 	set_left_most_child(assign_exp_node, lval);
+	free(label);
 	return assign_exp_node;
 }
 
@@ -282,9 +328,11 @@ ast append_var_decl_list_node(ast var_decl_list, ast var_node) {
 }
 
 ast new_decl_node(ast type, ast var_decl_list) {
-	ast decl_node = new_ast(DECLARATION, concat_str(3, type->ast_node_label, "_", var_decl_list->ast_node_label), UNDEFINED);
+	char* label = concat_str(3, type->ast_node_label, "_", var_decl_list->ast_node_label);
+	ast decl_node = new_ast(DECLARATION, label, UNDEFINED);
 	set_left_most_sibling(type, var_decl_list);
 	set_left_most_child(decl_node, type);
+	free(label);
 	return decl_node;
 }
 
@@ -323,26 +371,32 @@ ast new_exp_stmt_node(ast exp_node) {
 }
 
 ast new_if_stmt_node(ast condition, ast if_case, ast else_case) {
-	ast if_stmt_node = new_ast(IF_STATEMENT, concat_str(5, "if", "_", condition->ast_node_label, "_", if_case->ast_node_label), UNDEFINED);
+	char* label = concat_str(5, "if", "_", condition->ast_node_label, "_", if_case->ast_node_label);
+	ast if_stmt_node = new_ast(IF_STATEMENT, label, UNDEFINED);
 	set_left_most_sibling(condition, if_case);
 	if(else_case != NULL) set_left_most_sibling(if_case, else_case);
 	set_left_most_child(if_stmt_node, condition);
+	free(label);
 	return if_stmt_node;
 }
 
 ast new_while_stmt_node(ast condition, ast stmt) {
-	ast while_stmt_node = new_ast(WHILE_STATEMENT, concat_str(5, "while", "_", condition->ast_node_label, "_", stmt->ast_node_label), UNDEFINED);
+	char* label = concat_str(5, "while", "_", condition->ast_node_label, "_", stmt->ast_node_label);
+	ast while_stmt_node = new_ast(WHILE_STATEMENT, label, UNDEFINED);
 	set_left_most_sibling(condition, stmt);
 	set_left_most_child(while_stmt_node, condition);
+	free(label);
 	return while_stmt_node;
 }
 
 ast new_for_stmt_node(ast init_node, ast condition, ast inc_exp_node, ast stmt) {
-	ast for_stmt_node = new_ast(FOR_STATEMENT, concat_str(7, "for", "_", init_node->ast_node_label, "_", condition->ast_node_label, "_", stmt->ast_node_label), UNDEFINED);
+	char* label = concat_str(7, "for", "_", init_node->ast_node_label, "_", condition->ast_node_label, "_", stmt->ast_node_label);
+	ast for_stmt_node = new_ast(FOR_STATEMENT, label, UNDEFINED);
 	set_left_most_sibling(init_node, condition);
 	set_left_most_sibling(condition, stmt);
 	if(inc_exp_node != NULL) set_left_most_sibling(stmt,inc_exp_node);
 	set_left_most_child(for_stmt_node, init_node);
+	free(label);
 	return for_stmt_node;
 }
 
@@ -361,7 +415,7 @@ ast new_continue_stmt_node() {
 }
 
 ast new_compound_stmt_node(ast var_type_decl_list_node,ast stmt_list_node) {
-	ast compound_stmt_node = new_ast(BLOCK, concat_str(3, "compound", "_", var_type_decl_list_node->ast_node_label, "_", stmt_list_node->ast_node_label), UNDEFINED);
+	ast compound_stmt_node = new_ast(BLOCK, "compound", UNDEFINED);
 	if(var_type_decl_list_node != NULL) {
 		set_left_most_sibling(var_type_decl_list_node, stmt_list_node);
 		set_left_most_child(compound_stmt_node, var_type_decl_list_node);
@@ -387,7 +441,9 @@ ast append_param_list_node(ast param_list, ast param_node) {
 }
 
 ast new_func_def_node(ast type, char *id, ast param_list, ast compound_stmt) {
-	ast param_num_node = new_constant_node(get_param_num(param_list), INT);
+	ast temp;
+	char* param_num = get_param_num(param_list);
+	ast param_num_node = new_constant_node(param_num, INT);
 	ast func_def_node = new_ast(FUNCTION, id, type->return_type);
 	if(param_list != NULL) {
 		set_left_most_sibling(param_num_node, param_list);
@@ -396,7 +452,10 @@ ast new_func_def_node(ast type, char *id, ast param_list, ast compound_stmt) {
 		set_left_most_sibling(param_num_node, compound_stmt);
 	}
 	set_left_most_child(func_def_node, param_num_node);
-	purge_ast(type);
+	temp = type;
+	purge_ast(temp);
+	type = NULL;
+	free(param_num);
 	return func_def_node;
 }
 
@@ -447,10 +506,12 @@ ast append_trans_unit_list_node(ast trans_unit_list, ast global_decl) {
 }
 
 ast new_main_def_node(ast compound_stmt) {
-	ast param_num_node = new_constant_node(get_param_num(NULL), INT);
+	char* param_num = get_param_num(NULL);
+	ast param_num_node = new_constant_node(param_num, INT);
 	ast main_node = new_ast(FUNCTION, MAIN_FUNCTION_LABEL, INT);
 	set_left_most_child(main_node, param_num_node);
 	set_left_most_sibling(param_num_node, compound_stmt);
+	free(param_num);
 	return main_node;
 }
 

@@ -1,3 +1,12 @@
+/****************************************************************************************************
+
+	AST data structure. For more information, check abstract_syntax_tree.c. 
+		
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
+
 #ifndef _ABSTRACT_SYNTAX_TREE_H_
 #define _ABSTRACT_SYNTAX_TREE_H_
 

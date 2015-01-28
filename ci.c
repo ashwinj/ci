@@ -1,12 +1,13 @@
-/*---------------------------------------------------------------------------------------------------------
-Name: Ashwin Jha
-Roll Number: CS1328
-Program description: This piece of code will manage the call to ci virtual machine for running ci commands
-		     or interpreting ci scripts.	     
-Acknowledgements: 
------------------------------------------------------------------------------------------------------------*/
+/****************************************************************************************************
+
+	Command line handler for ci. It uses vm.c as helper.
+
+	@author		Ashwin Jha<ajha.dev@gmail.com>
+
+*****************************************************************************************************/
 #include "vm.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int main(int argc, char **argv) {
@@ -25,10 +26,15 @@ int main(int argc, char **argv) {
 			}
 		} else if(!strcmp(argv[1]+strlen(argv[1])-3,".ci")) {
 			in = fopen(argv[1], "r");
-			a = _interpret_(in);
+			if(in == NULL) {
+				fprintf(stderr, "\nUnable to open script file.\n");
+				exit(1);
+			} else {
+				a = _interpret_(in);
+				fclose(in);
+			}
 		} else {
-			/* handle incorrect usage.*/
-			/* print usage direction.*/
+			show_help();
 		}
 	}
 	return a;
