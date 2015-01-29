@@ -45,17 +45,23 @@ ast new_array_variable_node(char* id, ast offset1, ast offset2, data_type rt) {
 }
 
 ast new_inc_exp_node(ast_node_tag t, ast exp) {
+	ast new_node = new_ast(t, toString(t), INT);
 	ast unit_node = new_constant_node("1", INT);
-	ast inc_exp = new_assign_exp_node(exp, ADD_ASSIGN_CODE, unit_node);
-	inc_exp ->tag = t;
-	return inc_exp;
+	ast dup_exp = copy_ast(exp);
+	ast add_node = new_add_exp_node(dup_exp, ADDITION, unit_node);
+	set_left_most_child(new_node, exp);
+	set_left_most_sibling(exp, add_node);
+	return new_node;
 }
 
 ast new_dec_exp_node(ast_node_tag t, ast exp) {
+	ast new_node = new_ast(t, toString(t), INT);
 	ast unit_node = new_constant_node("1", INT);
-	ast dec_exp = new_assign_exp_node(exp, SUB_ASSIGN_CODE, unit_node);
-	dec_exp ->tag = t;
-	return dec_exp;
+	ast dup_exp = copy_ast(exp);
+	ast sub_node = new_add_exp_node(dup_exp, SUBTRACTION, unit_node);
+	set_left_most_child(new_node, exp);
+	set_left_most_sibling(exp, sub_node);
+	return new_node;
 }
 
 ast new_unary_exp_node(char op, ast exp) {

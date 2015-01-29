@@ -28,6 +28,8 @@ returnable* eval_param_list(ast param_list);
 returnable* eval_exp(ast exp_node, int mode);
 returnable* eval_exp_list(ast node);
 returnable* eval_assign_exp(ast node);
+returnable* eval_pre_inc_dec_exp(ast pre_node);
+returnable* eval_post_inc_dec_exp(ast post_node);
 returnable* eval_arithmetic_exp(ast node);
 returnable* eval_shift_exp(ast node);
 returnable* eval_rel_exp(ast node);

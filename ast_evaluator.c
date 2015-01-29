@@ -435,9 +435,11 @@ returnable* eval_exp(ast exp_node, int mode) {
 	case UNARY_MINUS:
 		return eval_unary_minus_exp(exp_node);
 	case PRE_INCREMENT:
-	case POST_INCREMENT:
 	case PRE_DECREMENT:
+		return eval_pre_inc_dec_exp(exp_node);
+	case POST_INCREMENT:
 	case POST_DECREMENT:
+		return eval_post_inc_dec_exp(exp_node);
 	case CALL:
 		return eval_func_call(exp_node);
 	default:
@@ -494,6 +496,63 @@ returnable* eval_assign_exp(ast node) {
 	purge_returnable(right);
 	return ret;
 }	
+
+returnable* eval_post_inc_dec_exp(ast node) {
+	ast left_;
+	ast right_;
+	returnable* left = NULL;
+	returnable* right = NULL;
+	returnable* ret;
+	left_ = get_left_most_child(node);
+	right_ = get_left_most_sibling(left_);
+	if(!is_lval_type(left_)) {
+		err_msg = "RUNTIME EXCEPTION: Not a valid LVALUE.\n\n";
+		err();
+	}
+	ret = eval_exp(left_, RVAL);
+	if(!is_int_type(ret->type)) {
+		err_msg = "RUNTIME EXCEPTION: Pre/Post Increment/Decrement operators operate on integers only.\n\n";
+		err();
+	}
+	left = eval_exp(left_, LVAL);
+	right = eval_exp(right_, RVAL);
+	if(!is_compatible(ptob(left->type),right->type)) {
+		err_msg = "RUNTIME EXCEPTION: Types incompatible for assignment opeartion.\n\n";
+		err();
+	}
+	purge_returnable(get_assign_value(left, right));
+	purge_returnable(left);
+	purge_returnable(right);
+	return ret;
+}
+
+returnable* eval_pre_inc_dec_exp(ast node) {
+	ast left_;
+	ast right_;
+	returnable* left = NULL;
+	returnable* right = NULL;
+	returnable* ret;
+	left_ = get_left_most_child(node);
+	if(!is_lval_type(left_)) {
+		err_msg = "RUNTIME EXCEPTION: Not a valid LVALUE.\n\n";
+		err();
+	}
+	right_ = get_left_most_sibling(left_);
+	left = eval_exp(left_, LVAL);
+	right = eval_exp(right_, RVAL);
+	if(!is_int_type(ptob(left->type))) {
+		err_msg = "RUNTIME EXCEPTION: Pre/Post Increment/Decrement operators operate on integers only.\n\n";
+		err();
+	}
+	if(!is_compatible(ptob(left->type),right->type)) {
+		err_msg = "RUNTIME EXCEPTION: Types incompatible for assignment opeartion.\n\n";
+		err();
+	}
+	ret = get_assign_value(left, right);
+	purge_returnable(left);
+	purge_returnable(right);
+	return ret;
+}
 
 returnable* eval_arithmetic_exp(ast node) {
 	ast left_;

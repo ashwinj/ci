@@ -139,10 +139,18 @@ char* toString(ast_node_tag tag) {
 	case REL_EQUAL:
 		return "==";
 	case REL_NOT_EQUAL:
-		return "!=";	
+		return "!=";
+	case PRE_INCREMENT:
+		return "pre ++";
+	case PRE_DECREMENT:
+		return "pre --";	
+	case POST_INCREMENT:
+		return "post ++";
+	case POST_DECREMENT:
+		return "post --";
 /*	case PROGRAM, FUNCTION, BLOCK, VARIABLE, ARRAY, ARRAY_ID, ARRAY_OFFSET, CONSTANT, TYPE, DECLARATION,
 	ASSIGNMENT, UNARY_SUBTRACTION,BITWISE_NOT, RELATIONAL_NOT, IF_STATEMENT, 
-	WHILE_STATEMENT, FOR_STATEMENT, POST_INCREMENT, POST_DECREMENT, TYPE_CAST */
+	WHILE_STATEMENT, FOR_STATEMENT,  TYPE_CAST */
 	default:
 		return "";
 	}
