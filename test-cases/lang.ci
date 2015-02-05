@@ -1,22 +1,12 @@
-int a[3][4] = {{1,2,3,4},{3,2,1,5},{2,3,4,6}};
-int b[4][3] = {{8,7,4},{6,4,5},{12,3,4},{9,3,2}};
-
-void print_mul(int** a, int** b, int row_a, int col_a, int col_b) {
-	int i, j, k;
-	int pro;
-	for(i = 0; i < row_a; i = i+1) {
-		for(j = 0; j < col_b; j = j+1) {
-			pro = 0;
-			for(k = 0; k < col_a; k = k+1) {
-				pro += a[i][k] * b[k][j];
-			}
-			printf("%d\t", pro);
-		}
-		printf("\n\n");
+void shifters() {
+	char i = 1;
+	for(;;) {
+		if(!i++) break;
+		printf("%c\n", i);
 	}
 }
 
 int main() {
-	print_mul(a, b, 3, 4, 3);
+	shifters();
 	return 0;
 }

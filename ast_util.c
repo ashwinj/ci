@@ -1024,7 +1024,7 @@ returnable* lib_printf(returnable* param_list) {
 					err_msg = "RUNTIME EXCEPTION: Char type parameter expected.\n\n";
 					err(); 
 				} else {
-					count += printf("%c", param->eval._CHAR);
+					count += printf("%c", (char)DOUBLE_VALUE(param));
 					i += 2;
 					break;
 				}
@@ -1033,7 +1033,7 @@ returnable* lib_printf(returnable* param_list) {
 					err_msg = "RUNTIME EXCEPTION: Int type parameter expected.\n\n";
 					err(); 
 				} else {
-					count += printf("%d", param->eval._INT);
+					count += printf("%d", (int)DOUBLE_VALUE(param));
 					i += 2;
 					break;
 				}
@@ -1042,7 +1042,7 @@ returnable* lib_printf(returnable* param_list) {
 					err_msg = "RUNTIME EXCEPTION: Float type parameter expected.\n\n";
 					err(); 
 				} else {
-					count += printf("%f", param->eval._FLOAT);
+					count += printf("%f", (float)DOUBLE_VALUE(param));
 					i += 2;
 					break;
 				}
@@ -1052,7 +1052,7 @@ returnable* lib_printf(returnable* param_list) {
 						err_msg = "RUNTIME EXCEPTION: Long type parameter expected.\n\n";
 						err(); 
 					} else {
-						count += printf("%ld", param->eval._LONG);
+						count += printf("%ld", (long)DOUBLE_VALUE(param));
 						i += 3;
 						break;
 					}
@@ -1061,7 +1061,7 @@ returnable* lib_printf(returnable* param_list) {
 						err_msg = "RUNTIME EXCEPTION: Double type parameter expected.\n\n";
 						err(); 
 					} else {
-						count += printf("%lf", param->eval._DOUBLE);						
+						count += printf("%lf", (double)DOUBLE_VALUE(param));						
 						i += 3;
 						break;
 					}
@@ -1135,6 +1135,10 @@ returnable* lib_printf(returnable* param_list) {
 		}
 	}
 	free(str);
+	if(param != NULL) {
+		err_msg = "RUNTIME EXCEPTION: No format for next print.\n\n";
+		err();
+	}
 	ret = new_returnable();
 	ret->type = INT;
 	ret->eval._INT = count;
@@ -1160,7 +1164,7 @@ returnable* lib_scanf(returnable* param_list) {
 		} else {
 			switch(str[i+1]) {
 			case 'c':
-				if(param == NULL || !is_compatible(param->type, CHAR_PTR)) {
+				if(param == NULL || param->type != CHAR_PTR) {
 					err_msg = "RUNTIME EXCEPTION: Char pointer type parameter expected.\n\n";
 					err(); 
 				} else {
@@ -1169,7 +1173,7 @@ returnable* lib_scanf(returnable* param_list) {
 					break;
 				}
 			case 'd':
-				if(param == NULL || !is_compatible(param->type, INT_PTR)) {
+				if(param == NULL || param->type != INT_PTR) {
 					err_msg = "RUNTIME EXCEPTION: Int pointer type parameter expected.\n\n";
 					err();
 				} else {
@@ -1177,8 +1181,17 @@ returnable* lib_scanf(returnable* param_list) {
 					i += 2;
 					break;
 				}
+			case 'h':
+				if(param == NULL || param->type != SHORT_PTR) {
+					err_msg = "RUNTIME EXCEPTION: Short pointer type parameter expected.\n\n";
+					err();
+				} else {
+					count += scanf("%hd", param->eval._SHORT_PTR);
+					i += 2;
+					break;
+				}
 			case 'f':
-				if(param == NULL || !is_compatible(param->type, FLOAT_PTR)) {
+				if(param == NULL || param->type != FLOAT_PTR) {
 					err_msg = "RUNTIME EXCEPTION: Float pointer type parameter expected.\n\n";
 					err(); 
 				} else {
@@ -1188,7 +1201,7 @@ returnable* lib_scanf(returnable* param_list) {
 				}
 			case 'l':
 				if(str[i+2]=='d') {
-					if(param == NULL || !is_compatible(param->type, LONG_PTR)) {
+					if(param == NULL || param->type != LONG_PTR) {
 						err_msg = "RUNTIME EXCEPTION: Long pointer type parameter expected.\n\n";
 						err(); 
 					} else {
@@ -1197,7 +1210,7 @@ returnable* lib_scanf(returnable* param_list) {
 						break;
 					}
 				} else if(str[i+2]=='f') {				
-					if(param == NULL || !is_compatible(param->type, DOUBLE_PTR)) {
+					if(param == NULL || param->type != DOUBLE_PTR) {
 						err_msg = "RUNTIME EXCEPTION: Double pointer type parameter expected.\n\n";
 						err(); 
 					} else {
@@ -1226,6 +1239,10 @@ returnable* lib_scanf(returnable* param_list) {
 		}
 	}
 	free(str);
+	if(param != NULL) {
+		err_msg = "RUNTIME EXCEPTION: No format for next scan.\n\n";
+		err();
+	}
 	ret = new_returnable();
 	ret->type = INT;
 	ret->eval._INT = count;

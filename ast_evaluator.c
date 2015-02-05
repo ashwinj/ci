@@ -773,7 +773,6 @@ int eval_stmt(ast stmt_node) {
 int eval_for_stmt(ast node) {
 	int loop_flag = 0;
 	int condition;
-	returnable* inc_ret = NULL;
 	ast init_node_ = get_left_most_child(node);
 	ast condition_ = get_left_most_sibling(init_node_);
 	ast stmt_ = get_left_most_sibling(condition_);
@@ -793,8 +792,7 @@ int eval_for_stmt(ast node) {
 		} else if(is_continue_condition) {
 			CONTEXT_ENV ^= CONTINUE_ENV;
 		}
-		inc_ret = eval_exp(inc_exp_node_, RVAL);
-		purge_returnable(inc_ret);
+		if(inc_exp_node_ != NULL) purge_returnable(eval_exp(inc_exp_node_, RVAL));
 		condition=eval_stmt(condition_);
 	}
 	if(loop_flag) CONTEXT_ENV ^= LOOP_ENV;

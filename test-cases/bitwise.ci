@@ -1,0 +1,18 @@
+void check_bitwise() {
+	char a = 'A';
+	char b = 'B';
+	char c = 'C';
+	char d = 'D';
+	char e = 'E';
+	char f = 'H';
+	char g = 'F';
+	printf("\n%c & %c = %c\n", a, b, a&b);
+	printf("%c | %c = %c\n", c, d, c|d);
+	printf("%c ^ %c = %c\n", e, f, e^f);
+	printf("~%c = %c\n",g, ~g);
+}
+
+int main() {
+	check_bitwise();
+	return 0;
+}
