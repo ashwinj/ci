@@ -79,6 +79,7 @@ data_type ptob(data_type type);
 data_type btop(data_type type);
 data_type get_effective_type(data_type left_type, data_type right_type);
 value get_const(data_type type, char * str);
+returnable* get_type_cast_val(data_type type, returnable* right);
 returnable* get_lval_from_entry(st_entry* e, int offset, int is_arr);
 returnable* get_rval_from_entry(st_entry* e, int offset, int is_arr);
 returnable* get_2arr_lval_from_entry(st_entry* e, int row, int col, int is_ptr);

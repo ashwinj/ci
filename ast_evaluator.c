@@ -440,6 +440,8 @@ returnable* eval_exp(ast exp_node, int mode) {
 	case POST_INCREMENT:
 	case POST_DECREMENT:
 		return eval_post_inc_dec_exp(exp_node);
+	case TYPE_CAST:
+		return eval_cast_exp(exp_node);
 	case CALL:
 		return eval_func_call(exp_node);
 	default:
@@ -552,6 +554,26 @@ returnable* eval_pre_inc_dec_exp(ast node) {
 	purge_returnable(left);
 	purge_returnable(right);
 	return ret;
+}
+
+returnable* eval_cast_exp(ast node) {
+	ast left_;
+	ast right_;
+	data_type left;
+	returnable* right = NULL;
+	returnable* ret;
+	left_ = get_left_most_child(node);
+	right_ = get_left_most_sibling(left_);
+	left = eval_type(left_);
+	right = eval_exp(right_, RVAL);
+	if(is_basic_type(left)) {
+		ret = get_type_cast_val(left, right);
+		purge_returnable(right);
+		return ret;
+	} else {
+		err_msg = "RUNTIME EXCEPTION: Invalid typecast operation.\n\n";
+		err();
+	}
 }
 
 returnable* eval_arithmetic_exp(ast node) {

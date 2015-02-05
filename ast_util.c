@@ -154,6 +154,61 @@ value get_const(data_type type, char* str) {
 	}
 }
 
+returnable* get_type_cast_val(data_type type, returnable* right) {
+	returnable* ret = new_returnable();
+	ret->type = type;
+	switch(type) {
+		case CHAR:
+			if(!is_basic_type(right->type)) {
+				err_msg = "RUNTIME EXCEPTION: Pointer type value not expected.\n\n";
+				err();
+			} else { 
+				ret->eval._CHAR = (char)DOUBLE_VALUE(right);
+			}
+			return ret;
+		case SHORT:
+			if(!is_basic_type(right->type)) {
+				err_msg = "RUNTIME EXCEPTION: Pointer type value not expected.\n\n";
+				err();
+			} else { 
+				ret->eval._SHORT = (short)DOUBLE_VALUE(right);
+			}
+			return ret;
+		case INT:
+			if(!is_basic_type(right->type)) {
+				err_msg = "RUNTIME EXCEPTION: Pointer type value not expected.\n\n";
+				err();
+			} else { 
+				ret->eval._INT = (int)DOUBLE_VALUE(right);
+			}
+			return ret;
+		case LONG:
+			if(is_basic_type(right->type)) ret->eval._LONG = (long)DOUBLE_VALUE(right);
+			else if(is_1pointer_type(right->type)) ret->eval._LONG = (long)DOUBLE_PTR_VALUE(right);
+			else if(is_2pointer_type(right->type)) ret->eval._LONG = (long)DOUBLE_2PTR_VALUE(right);
+			return ret;
+		case FLOAT:
+			if(!is_basic_type(right->type)) {
+				err_msg = "RUNTIME EXCEPTION: Pointer type value not expected.\n\n";
+				err();
+			} else { 
+				ret->eval._FLOAT = (float)DOUBLE_VALUE(right);
+			}
+			return ret;
+		case DOUBLE:
+			if(!is_basic_type(right->type)) {
+				err_msg = "RUNTIME EXCEPTION: Pointer type value not expected.\n\n";
+				err();
+			} else { 
+				ret->eval._DOUBLE = (double)DOUBLE_VALUE(right);
+			}
+			return ret;
+		default:
+			err_msg = "RUNTIME EXCEPTION: Type cast is available for basic types only.\n\n";
+			err();
+	}
+}
+
 returnable* get_lval_from_entry(st_entry* e, int offset, int is_arr) {
 	returnable* ret = new_returnable();
 	ret->eval = get_val_from_entry(e, LVAL, offset, is_arr);
@@ -451,27 +506,27 @@ returnable* get_assign_value(returnable* left, returnable* right) {
 	ret->type = ptob(left->type);
 	switch(left->type) {	
 	case CHAR_PTR:
-		*(left->eval._CHAR_PTR) = CHAR_VALUE(right);
+		*(left->eval._CHAR_PTR) = (char)DOUBLE_VALUE(right);
 		ret->eval._CHAR = *(left->eval._CHAR_PTR);
 		return ret;		
 	case SHORT_PTR:
-		*(left->eval._SHORT_PTR) = SHORT_VALUE(right);
+		*(left->eval._SHORT_PTR) = (short)DOUBLE_VALUE(right);
 		ret->eval._SHORT = *(left->eval._SHORT_PTR);
 		return ret;		
 	case INT_PTR:
-		*(left->eval._INT_PTR) = INT_VALUE(right);
+		*(left->eval._INT_PTR) = (int)DOUBLE_VALUE(right);
 		ret->eval._INT = *(left->eval._INT_PTR);
 		return ret;		
 	case LONG_PTR:
-		*(left->eval._LONG_PTR) = LONG_VALUE(right);
+		*(left->eval._LONG_PTR) = (long)DOUBLE_VALUE(right);
 		ret->eval._LONG = *(left->eval._LONG_PTR);
 		return ret;		
 	case FLOAT_PTR:
-		*(left->eval._FLOAT_PTR) = FLOAT_VALUE(right);
+		*(left->eval._FLOAT_PTR) = (float)DOUBLE_VALUE(right);
 		ret->eval._FLOAT = *(left->eval._FLOAT_PTR);
 		return ret;		
 	case DOUBLE_PTR:
-		*(left->eval._DOUBLE_PTR) = DOUBLE_VALUE(right);
+		*(left->eval._DOUBLE_PTR) = (double)DOUBLE_VALUE(right);
 		ret->eval._DOUBLE = *(left->eval._DOUBLE_PTR);
 		return ret;	
 	case VOID_2PTR:
@@ -536,22 +591,22 @@ returnable* get_assign_value(returnable* left, returnable* right) {
 void set_init_value(st_entry* entry, int offset, returnable* _init_) {
 	switch(entry->symbol_entry_type) {	
 	case CHAR:
-		*(entry->symbol_entry_value.var_val._CHAR_PTR + offset) = CHAR_VALUE(_init_);
+		*(entry->symbol_entry_value.var_val._CHAR_PTR + offset) = (char)DOUBLE_VALUE(_init_);
 		return;		
 	case SHORT:
-		*(entry->symbol_entry_value.var_val._SHORT_PTR + offset) = SHORT_VALUE(_init_);
+		*(entry->symbol_entry_value.var_val._SHORT_PTR + offset) = (short)DOUBLE_VALUE(_init_);
 		return;		
 	case INT:
-		*(entry->symbol_entry_value.var_val._INT_PTR + offset) = INT_VALUE(_init_);
+		*(entry->symbol_entry_value.var_val._INT_PTR + offset) = (int)DOUBLE_VALUE(_init_);
 		return;		
 	case LONG:
-		*(entry->symbol_entry_value.var_val._LONG_PTR + offset) = LONG_VALUE(_init_);
+		*(entry->symbol_entry_value.var_val._LONG_PTR + offset) = (long)DOUBLE_VALUE(_init_);
 		return;		
 	case FLOAT:
-		*(entry->symbol_entry_value.var_val._FLOAT_PTR + offset) = FLOAT_VALUE(_init_);
+		*(entry->symbol_entry_value.var_val._FLOAT_PTR + offset) = (float)DOUBLE_VALUE(_init_);
 		return;		
 	case DOUBLE:
-		*(entry->symbol_entry_value.var_val._DOUBLE_PTR + offset) = DOUBLE_VALUE(_init_);
+		*(entry->symbol_entry_value.var_val._DOUBLE_PTR + offset) = (double)DOUBLE_VALUE(_init_);
 		return;		
 	case VOID_PTR:
 		*(entry->symbol_entry_value.var_val._VOID_2PTR + offset) = VOID_PTR_VALUE(_init_);
@@ -604,22 +659,22 @@ void set_init_value(st_entry* entry, int offset, returnable* _init_) {
 void set_2arr_init_value(st_entry* entry, int row, int col, returnable* _init_) {
 	switch(entry->symbol_entry_type) {	
 	case CHAR:
-		*(*(entry->symbol_entry_value.var_val._CHAR_2PTR + row) + col) = CHAR_VALUE(_init_);
+		*(*(entry->symbol_entry_value.var_val._CHAR_2PTR + row) + col) = (char)DOUBLE_VALUE(_init_);
 		return;		
 	case SHORT:
-		*(*(entry->symbol_entry_value.var_val._SHORT_2PTR + row) + col) = SHORT_VALUE(_init_);
+		*(*(entry->symbol_entry_value.var_val._SHORT_2PTR + row) + col) = (short)DOUBLE_VALUE(_init_);
 		return;		
 	case INT:
-		*(*(entry->symbol_entry_value.var_val._INT_2PTR + row) + col) = INT_VALUE(_init_);
+		*(*(entry->symbol_entry_value.var_val._INT_2PTR + row) + col) = (int)DOUBLE_VALUE(_init_);
 		return;		
 	case LONG:
-		*(*(entry->symbol_entry_value.var_val._LONG_2PTR + row) + col) = LONG_VALUE(_init_);
+		*(*(entry->symbol_entry_value.var_val._LONG_2PTR + row) + col) = (long)DOUBLE_VALUE(_init_);
 		return;		
 	case FLOAT:
-		*(*(entry->symbol_entry_value.var_val._FLOAT_2PTR + row) + col) = FLOAT_VALUE(_init_);
+		*(*(entry->symbol_entry_value.var_val._FLOAT_2PTR + row) + col) = (float)DOUBLE_VALUE(_init_);
 		return;		
 	case DOUBLE:
-		*(*(entry->symbol_entry_value.var_val._DOUBLE_2PTR + row) + col) = DOUBLE_VALUE(_init_);
+		*(*(entry->symbol_entry_value.var_val._DOUBLE_2PTR + row) + col) = (double)DOUBLE_VALUE(_init_);
 		return;
 	default:
 		err_msg = "INTERNAL EXCEPTION: Invalid type operation.\n\n";
