@@ -627,7 +627,7 @@ returnable* eval_bitwise_exp(ast node) {
 	right_ = get_left_most_sibling(left_);
 	left = eval_exp(left_, RVAL);
 	if(right_ != NULL) right = eval_exp(right_, RVAL);
-	if(is_int_type(left->type) && is_int_type(right->type)) {
+	if(is_int_type(left->type) && (right == NULL || is_int_type(right->type))) {
 		ret = get_bitwise_value(left, right, node->tag);
 		purge_returnable(left);
 		purge_returnable(right);
@@ -673,7 +673,7 @@ returnable* eval_conditional_exp(ast node) {
 	} else {
 		ret = eval_exp(false_case_, RVAL);
 	}
-	purge_returnable(ret);
+	purge_returnable(condition);
 	return ret;
 }
 
