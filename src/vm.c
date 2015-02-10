@@ -1,5 +1,21 @@
 /****************************************************************************************************
 
+	Copyright (C) 2015 Ashwin Jha
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 	Virtual machine for ci. It manages all the modules of the interpreter to
 	parse-->build ast-->evaluate ast.
 	For more information on specific modules, check following:
@@ -36,7 +52,11 @@ ast _main_ref_;
  */
 
 void publish_masthead() {
-	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n\t"
+	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n"
+			"Copyright (C) 2015  Ashwin Jha\n"
+			"This program comes with ABSOLUTELY NO WARRANTY; for details type \'ci -h\'.\n"
+			"This is free software, and you are welcome to redistribute it under certain\n"
+			"conditions; type \'ci -h\' for details.\n\n\t"
 			"@author  	Ashwin Jha<ajha.dev@gmail.com>\n\t"
 			"@contributor  	Durgesh Singh<durgesh.ccet@gmail.com>\n\n");
 }

@@ -1,5 +1,21 @@
 /****************************************************************************************************
 
+	Copyright (C) 2015 Ashwin Jha
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 	Lexer generator file. This file is influenced from the grammar rules given in
 	K&R book and various internet links.
 
@@ -115,14 +131,12 @@ L?\"(\\.|[^\\"])*\"	{ count();  yylval.string = strdup(yytext); return(STRING_LI
 
 %%
 
-yywrap()
-{
+yywrap() {
 	return(1);
 }
 
 
-static void comment(void)
-{
+static void comment(void) {
     int c;
 
     while ((c = input()) != 0)
@@ -144,17 +158,16 @@ static void comment(void)
 int row = 1;
 int column = 0;
 
-void count()
-{
+void count() {
 	int i;
-
-	for (i = 0; yytext[i] != '\0'; i++)
+	for (i = 0; yytext[i] != '\0'; i++) {
 		if (yytext[i] == '\n') {
 			row++;
 			column = 0;
 		} else if (yytext[i] == '\t') {
 			column += 8 - (column % 8);
-		} else
+		} else {
 			column++;
-	//ECHO;
+		}
+	}
 }

@@ -1,5 +1,21 @@
 /****************************************************************************************************
 
+	Copyright (C) 2015 Ashwin Jha
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 	This is a helper module for ast_evaluator.c. It handles the type specific tasks and
 	other utility tasks. in general this file requires a lot of changes. we were in a
 	hurry to complete our project and so we gave preference to correct and stable 
