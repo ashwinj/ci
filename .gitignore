@@ -5,3 +5,6 @@
 *.out
 bin/
 obj/
+include/y.tab.h
+src/y.tab.c
+src/lex.yy.c
