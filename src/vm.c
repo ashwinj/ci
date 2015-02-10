@@ -52,7 +52,7 @@ ast _main_ref_;
  */
 
 void publish_masthead() {
-	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n"
+	fprintf(stdout, "\nci interpreter v"INTERPRETER_VERSION"\n"
 			"Copyright (C) 2015  Ashwin Jha\n"
 			"This program comes with ABSOLUTELY NO WARRANTY; for details type \'ci -h\'.\n"
 			"This is free software, and you are welcome to redistribute it under certain\n"

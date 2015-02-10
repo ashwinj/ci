@@ -27,7 +27,7 @@
 
 #include "abstract_syntax_tree.h"
 
-#define INTERPRETER_VERSION		"debug_v0.1"
+#define INTERPRETER_VERSION		"1.0"
 
 int _start_();
 int _interpret_();
