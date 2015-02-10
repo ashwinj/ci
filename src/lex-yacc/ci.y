@@ -14,6 +14,7 @@
 #include "interpreter.h"
 #include "abstract_syntax_tree.h"
 #include "ast_builder.h"
+#include "ast_evaluator.h"
 #include "symbol_table.h"
 #include "vm.h"
 	

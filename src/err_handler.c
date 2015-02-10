@@ -10,8 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "abstract_syntax_tree.h"
-#include "symbol_table.h"
+#include "interpreter.h"
 
 //err_t err_type;
 char* err_msg;

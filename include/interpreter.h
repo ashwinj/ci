@@ -27,7 +27,7 @@
 #define DOUBLE_SIZE 			       sizeof(double)
 #define PTR_SIZE 				sizeof(char*)
 
-#define MAIN_FUNCTION_LABEL 			  "main"
+#define MAIN_FUNCTION_LABEL 			       "main"
 #define PRINTF_LABEL 				     "printf"
 #define SCANF_LABEL 				      "scanf"					    
 

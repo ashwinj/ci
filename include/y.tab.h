@@ -152,7 +152,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 35 "ci.y" /* yacc.c:1909  */
+#line 36 "ci.y" /* yacc.c:1909  */
 
 	ast node;
 	char unary_code;
