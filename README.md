@@ -1,7 +1,9 @@
 CI interpreter
 
 * CI is a small interpreter for c language written completely in c itself.
-* This project is licensed under the terms of the GNU GPL v3.0.
+* This project has been developed as part of our Compiler course [1] assignment 
+  at ISI, Kolkata under the guidance of Dr. Mandar Mitra and Dr. Utpal Garain.
+* The project is licensed under the terms of the GNU GPL v3.0.
 * Lexer and parser are generated using flex and bison.
 * The flex and bison files are heavily influenced by the grammar rules discussed
   in K&R book.
@@ -13,3 +15,8 @@ CI interpreter
 	   this will require addition of fields in the ast data structure
 	   and a data structure to encapsulate the error object.
 	4. better commenting and documentation.
+	5. provide an installation script, though the compilation from source is
+	   itself a fairly easy process.
+
+References:
+* http://www.isical.ac.in/~mandar/courses.html#cc
