@@ -19,4 +19,5 @@ CI interpreter
 	   itself a fairly easy process.
 
 References:
-* http://www.isical.ac.in/~mandar/courses.html#cc
+
+1. http://www.isical.ac.in/~mandar/courses.html#cc
