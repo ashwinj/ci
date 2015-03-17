@@ -1,6 +1,6 @@
 /****************************************************************************************************
 
-	Copyright (C) 2015 Ashwin Jha
+	Copyright (C) 2015 Ashwin Jha and Durgesh Singh
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -63,6 +63,8 @@ static void comment();
 "short"			{ count(); return(SHORT_TYPE); }
 "void"			{ count(); return(VOID_TYPE); }
 "while"			{ count(); return(WHILE); }
+
+"exit"			{err_msg="";err();}/*ci command to exit interactive session. This will be changed later. Usage in scripts should be avoided.*/
 
 {L}({L}|{D})*		{count(); yylval.string = strdup(yytext); return(IDENTIFIER);}
 

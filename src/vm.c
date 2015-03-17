@@ -1,6 +1,6 @@
 /****************************************************************************************************
 
-	Copyright (C) 2015 Ashwin Jha
+	Copyright (C) 2015 Ashwin Jha and Durgesh Singh
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ ast _main_ref_;
 
 void publish_masthead() {
 	fprintf(stdout, "\nci interpreter v"INTERPRETER_VERSION"\n"
-			"Copyright (C) 2015  Ashwin Jha\n"
+			"Copyright (C) 2015  Ashwin Jha and Durgesh Singh\n"
 			"This program comes with ABSOLUTELY NO WARRANTY; for details type \'ci -h\'.\n"
 			"This is free software, and you are welcome to redistribute it under certain\n"
 			"conditions; type \'ci -h\' for details.\n\n\t"
@@ -62,7 +62,7 @@ void publish_masthead() {
 }
 
 void show_help() {
-	fprintf(stdout, "\nci interpreter "INTERPRETER_VERSION"\n"
+	fprintf(stdout, "\nci interpreter v"INTERPRETER_VERSION"\n"
 			"Usage:\n"
 			"Virtual Machine:\tci <ci script file with \".ci\" extension>\n"
 			"Interactive Session:\tci\n"
