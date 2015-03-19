@@ -1109,42 +1109,52 @@ returnable* lib_printf(returnable* param_list) {
 			switch(str[i+1]) {
 			case 't':
 				count += printf("\t");
+				i += 2;
 				break;
 			case 'n':
 				count += printf("\n");
+				i += 2;
 				break;
 			case '\\':
 				count += printf("\\");
+				i += 2;
 				break;
 			case '\'':
 				count += printf("\'");
+				i += 2;
 				break;
 			case '\"':
 				count += printf("\"");
+				i += 2;
 				break;
 			case 'v':
 				count += printf("\v");
+				i += 2;
 				break;
 			case 'b':
 				count += printf("\b");
+				i += 2;
 				break;
 			case 'a':
 				count += printf("\a");
+				i += 2;
 				break;
 			case 'f':
 				count += printf("\f");
+				i += 2;
 				break;
 			case 'r':
 				count += printf("\r");
+				i += 2;
 				break;
 			case '?':
 				count += printf("\?");
+				i += 2;
 				break;
 			default:
 				err_msg = "RUNTIME EXCEPTION: Invalid use of \\.\n\n";
 				err();				
 			}
-			i += 2;
 		} else {
 			count += printf("%c", str[i]);
 			i += 1;
