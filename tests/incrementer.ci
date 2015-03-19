@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-	Shift operations.
+	Checking increment operation within loop.
 
 	@author		Ashwin Jha<ajha.dev@gmail.com>
 
@@ -26,7 +26,7 @@ void shifters() {
 	char i=1;
 	for(;;) {
 		if(!i++) break;
-		printf("%c\n",i);
+		printf("\n%c\t\t%c\n",i,i);
 	}
 }
 

@@ -1031,7 +1031,7 @@ returnable* lib_printf(returnable* param_list) {
 	}
 	str = param->eval._CHAR_PTR;
 	param = param->next;
-	len = strlen(str);
+	len = strlen(str)-1;
 	while(len >= i) {
 		if(str[i] == '%') {
 			switch(str[i+1]) {
