@@ -1011,7 +1011,7 @@ returnable* get_bitwise_value(returnable* left, returnable* right, ast_node_tag 
 		ret->eval._INT = (INT_VALUE(left) | INT_VALUE(right));
 		return ret;
 	case BITWISE_XOR:
-		ret->eval._INT = (INT_VALUE(left) | INT_VALUE(right));
+		ret->eval._INT = (INT_VALUE(left) ^ INT_VALUE(right));
 		return ret;
 	case BITWISE_NOT:
 		ret->eval._INT = (~INT_VALUE(left));
