@@ -64,7 +64,7 @@ static void comment();
 "void"			{ count(); return(VOID_TYPE); }
 "while"			{ count(); return(WHILE); }
 
-"exit"			{err_msg="";err();}/*ci command to exit interactive session. This will be changed later. Usage in scripts should be avoided.*/
+"bye"			{err_msg="";err();}/*ci command to exit interactive session. This will be changed later. Usage in scripts should be avoided.*/
 
 {L}({L}|{D})*		{count(); yylval.string = strdup(yytext); return(IDENTIFIER);}
 
